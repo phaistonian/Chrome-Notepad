@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Options - Chrome Notepad</title>
+	<style type="text/css" media="all">
+	body {
+		background: white;
+		color: #111;
+		font: normal 12px arial, serif;
+	}
+	
+	table {
+		margin: 10px 0;
+	}
+	td, th {
+		text-align: center;
+		padding: 5px 10px;
+		text-align: left;
+		vertical-align: top;
+	}
+	th {
+		text-align: right;
+	}
+	textarea {
+		height: 10em;
+		width: 18em;
+		display: block;
+		margin-top: 5px;
+	}
+	small {
+		font-size: 11px;
+		display: block;
+		margin-top: 5px;
+		color: #999;
+	}
+	address {
+		margin-top: 20px;
+	}
+	.selected {
+		background: yellow;
+		font-weight:bold;
+	}
+	
+	span {
+		color: green;
+		display: none;
+	}
+	a {
+		color: blue;
+	}
+	
+	</style>
+	<script type="text/javascript" src="js/js.js"></script>
+	<script type="text/javascript">
+	Options = {
+		data		: localStorage['data'] ? JSON.parse(localStorage['data']) : { 
+			'options' : {
+				'sync' 	: true,
+				'size'	: 'm'
+			}
+		},
+		
+		initialize	: function() {
+			var sync = document.getElementById('sync');
+			if(!this.data.options) {
+				this.data.options = {
+					'sync' : true
+				}
+			}
+			
+			/* Sizes */
+			this.data.options.fontSize	= this.data.options.fontSize 		|| '13';
+			this.data.options.size 		= this.data.options.size 			|| 'm';
+			var sizes = {
+				'xs': 'Extra Small',
+				's'	: 'Small',
+				'm'	: 'Medium',
+				'l'	: 'Large',
+				'XL': 'Extra Large'
+			}
+			
+			var fontSizes	= {
+				'10' : '10px',
+				'11' : '11px',
+				'12' : '12px',
+				'13' : '13px (default)',
+				'14' : '14px',
+				'15' : '15px',
+				'16' : '16px'
+			}
+			
+			var sizesHTML = [], fontSizesHTML = [];
+			for(var i in sizes) {
+				sizesHTML.push('<option value="' + i + '">' + sizes[i] + '</option>');
+			}
+			
+			for(var i in fontSizes) {
+				fontSizesHTML.push('<option value="' + i + '">' + fontSizes[i] + '</option>');
+			}
+			
+			
+			document.getElementById('size').innerHTML = sizesHTML.join('');
+			
+			document.getElementById('font-size').innerHTML = fontSizesHTML.join('');
+			
+			if(this.data.options.size) {
+				this.select('size', this.data.options.size);
+			}
+
+
+			if(this.data.options.fontSize) {
+				this.select('font-size', this.data.options.fontSize);
+			}
+
+
+			if(this.data.options.sync) {
+				sync.checked = true;
+			}
+			
+			
+			
+
+		},
+		
+		save		: function() {
+			var sync 	= document.getElementById('sync');
+			var size 	= document.getElementById('size');		
+			var fontSize = document.getElementById('font-size');
+			
+			// Store
+			//this.data 				= localStorage['data'] ? JSON.parse(localStorage['data']) : this.data;
+			this.data.options.sync		= !!sync.checked;
+			this.data.options.size 		= size.value;
+			this.data.options.fontSize 	= fontSize.value;
+			
+			localStorage['data']	= JSON.stringify(this.data);
+			
+			var say = document.getElementById('say');
+			say.innerHTML 		= 'Saved';
+			say.style.display	= 'inline';
+			
+			setTimeout((function() {
+				say.style.display = 'none';
+	
+			}), 1500);
+			
+			
+			chrome.extension.sendRequest({'update': true}, function() {
+				
+			});
+			
+		},
+		
+		select	: function(what, value) {
+			var select = document.getElementById(what);
+			Array.prototype.slice.call(select.options).forEach(function(option, index) {
+				if(option.value == value ) {
+					select.selectedIndex = index;
+				}
+			});
+		}	
+		
+	}	
+	</script>
+</head>
+
+<body onload="Options.initialize()">
+
+<h2>Chrome Notepad &rarr; Options</h2>
+
+
+<table cellspacing="0">
+	<tr>
+		<th>Sync notes</th>
+		<td>
+			<input type="checkbox" name="sync" id="sync" />
+			<small>If syncing is enabled, up to 1.8k of notes can be synced for now, the rest will be discarded.</small>
+			</td>
+	</tr>
+	<tr>
+		<th>Default notepad size</th>
+		<td>
+			<select name="size" id="size"></select>
+		</td>
+	</tr>
+	
+
+	<tr>
+		<th>Font size</th>
+		<td>
+			<select name="font-size" id="font-size"></select>
+		</td>
+	</tr>
+	
+
+	
+		<tr>
+	
+		<th>&nbsp;</th>
+		<td><button onclick="Options.save()">Save options</button> <span id="say">Changed</span></td>
+	</tr>
+</table>
+
+</body>
+</html>
