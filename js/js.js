@@ -14,6 +14,7 @@ Ext = {
 
         this.initialized = true;
 
+        this.loadConfig();
         this.$textArea   = $("#notepad");
 
         //Load data from local storage
@@ -94,6 +95,19 @@ Ext = {
 
         this.bindEvents();
 	},
+
+    loadConfig : function() {
+        chrome.storage.sync.get({
+            fontSize: "14px",
+            fontFamily: "default"
+        }, function(item) {
+
+            $("textarea").css({
+                "font-family" : item.fontFamily,
+                "font-size" : item.fontSize
+            })
+        });
+    },
 
     hightlightSelected : function () {
         var self = this;
@@ -376,5 +390,8 @@ window.onload = function () {
     $(".folder-name").eq(0).addClass("active");
 };
 
-Ext.initialize();
+if(location.href.indexOf('popup.html') !== -1) {
+    Ext.initialize();
+}
+
 
