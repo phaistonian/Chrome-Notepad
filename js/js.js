@@ -101,6 +101,10 @@ Ext = {
         $(".folder-name[data-bid='"+self.selectedNoteId+"']").addClass("active");
     },
 
+    trackGoogleEvent : function() {
+        _gaq.push(['_trackEvent', "NoteCreated", 'clicked', "NoteCreated"]);
+    },
+
     bindEvents : function() {
         var self = this;
         this.$textArea.on("keyup", function() {
@@ -118,8 +122,11 @@ Ext = {
                 self.selectedNoteId = data.id;
                 self.renderFolders(function() {
                     self.hightlightSelected();
+
                 });
             });
+
+            self.trackGoogleEvent();
         });
 
         $(".collapse-action").on("click", function() {
@@ -368,4 +375,6 @@ Ext = {
 window.onload = function () {
     $(".folder-name").eq(0).addClass("active");
 };
+
 Ext.initialize();
+
