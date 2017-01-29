@@ -4,18 +4,82 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>Chrome Notepad</title>
 	<style type="text/css" media="all">
-	<!--
-	textarea {
-		width:  40em;
-		height: 15em;
-		max-width: 80em;
-		max-height: 50em;
+
+	* {
+		margin: 0px;
+		padding: 0px;
+		box-sizing: border-box;
+	}
+
+	.header-strip {
+		height : 50px;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0px 10px;
+		border-bottom: 1px solid #ddd;
+	}
+	body {
+		padding: 0px;
+		margin: 0px;
+		width: 800px;
+	}
+	.container {
+		width:  100%;
 		font-size: 13px;
 		font-weight: normal;
 		font-family: "Droid Sans Mono Slashed", "Consolas", "Monaco", "Courier New", serif;
 		resize: both;
-		max-width:  700px;
-		max-height: 550px;
+		display: flex;
+		flex-direction: row;
+		min-height: 400px;
+		height : auto;
+	}
+	.rpanel {
+		box-sizing: border-box;
+		width: 620px;
+		position: absolute;
+		right : 0px;
+		background: #ffffff;
+		display: flex;
+		flex-direction: column;
+		height : 100vh;
+	}
+	textarea {
+		white-space: pre;
+		width : 100%;
+		max-width : 100%;
+		outline: none;
+		border: none;
+		box-sizing: border-box;
+		padding: 15px;
+		font-size: 14px;
+		height: 330px;
+		resize: none;
+		overflow: auto;
+	}
+	.folderMenu {
+		width: 180px;
+		background-color: #eeeeee;
+		box-sizing: border-box;
+		padding : 5px;
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
+	.expand-arrow {
+		height : 16px;
+		width: 16px;
+		background: url("./icons/expand-arrow.svg");
+	}
+	.collapse-arrow {
+		height : 16px;
+		width: 16px;
+		background: url("./icons/collapse-arrow.svg");
+	}
+	.collapse-action {
+		cursor: pointer;
 	}
 	#footer {
 		font: normal 12px arial, serif;
@@ -28,14 +92,104 @@
 	#footer #sync {
 		float: right;
 	}
-	-->
+
+	.newNoteBtn {
+		background-color: #00AB74;
+		border-radius: 100px;
+		color : #ffffff;
+		text-align: center;
+		width: 100px;
+		cursor: pointer;
+		padding: 5px;
+		height: 26px;
+		font-face : Avenir-Book;
+		font-size: 14px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.folder-name {
+		font-size: 14px;
+		color : #32403C;
+		margin-top: 5px;
+		cursor: pointer;
+	}
+	.folder-name.active {
+		color : #00AB74;
+	}
+	.folder-search {
+		height: 25px;
+		border: none;
+		font-size: 14px;
+		padding: 5px;
+		border-radius: 10px;
+		outline: none;
+	}
+
+	.delete-action {
+		height:16px;
+		width: 16px;
+		background: url("./icons/delete.svg");
+		cursor: pointer;
+		margin-right: 10px;
+	}
+	.search {
+		background-image: url("./icons/search.svg");
+		background-repeat: no-repeat;
+		background-position: 135px;
+	}
+
+	.right-actions {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	.footer-strip {
+		height : 28px;
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+		align-items: center;
+		color : #000000;
+		opacity: 0.3;
+		font-size : 12px;
+		padding : 0px 10px;
+		border-top: 1px solid #dddddd;
+	}
+	.folder-items {
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
 	</style>
 </head>
 
 <body>
-<div id="footer" style="overflow: hidden;">
-	<span id="updated">Updated: N/A</span>
-	<span id="sync">Syncing is off</span>
-  <script src="js/js.js"></script>
+
+	<div class="container">
+		<div class="folderMenu">
+			<input type="text" class = "folder-search search" placeholder="Search Notes.."/>
+			<div class="folder-items"></div>
+		</div>
+		<div class="rpanel">
+			<div class="header-strip">
+				<div class = "collapse-action collapse-arrow"></div>
+
+				<div class = "right-actions">
+					<div class="delete-action"></div>
+					<div class = "newNoteBtn">New Note</div>
+				</div>
+			</div>
+			<textarea id = "notepad" placeholder="Write something here !!"></textarea>
+
+			<div class="footer-strip">
+				<div>Last synchronization on : <span class="sync"></span></div>
+			</div>
+		</div>
+	</div>
+
+
+	<script src ="js/jquery.min.js"></script>
+	<script src ="js/js.js"></script>
 </body>
 </html>

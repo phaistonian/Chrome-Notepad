@@ -2,7 +2,7 @@
   "name"			        : "Notepad",
   "description"		    : "A very simple notepad for Chrome with sync functionality.",
     "background": {
-      "scripts": ["js/core-lite.js", "js/core.chrome.js", "js/js.js", "background.js"]
+      "scripts": ["js/jquery.min.js","js/js.js","background.js"]
    },
   "options_page"      : "options.html",
 
@@ -21,11 +21,8 @@
     "tabs",
     "bookmarks"
   ],
-
-
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
-    "update_url": "http://clients2.google.com/service/update2/crx",
-    "manifest_version": 2,
-
-    "version": "4.1"
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "update_url": "http://clients2.google.com/service/update2/crx",
+  "manifest_version": 2,
+  "version": "4.1"
 }

@@ -1,286 +1,298 @@
-/*
- * TODO
- * Size checks!
- * Stop sync timer if notneeded (niah)
-*/
-//delete (localStorage['data']);
-//var lala = chrome.bookmarks.getTree(function() {
-//	console.log(arguments);
-//});
-// //console.log(lala);
+
+var parentBookmarkId = "0";
+
 
 Ext = {
-	bookmark	: {},
-	data		: {},
 
-	inPopup		: location.href.indexOf('popup.html') !== -1,
+	initialized : false,
+	
+	initialize  : function() {
+		var self = this;
+        var content;
 
-	debugOn		: false,
+		if(this.initialized === true) return;
 
-	sizes		: {
-		'xs': ['Extra Small', 25, 5],
-		's'	: ['Small', 30,10],
-		'm'	: ['Medium', 40, 15],
-		'l'	: ['Large', 50, 20],
-		'XL': ['Extra Large', 65, 30]
-	},
+        this.initialized = true;
 
+        this.$textArea   = $("#notepad");
 
-	initialize : function() {
-
+        //Load data from local storage
         this.load();
 
-        if(this.inPopup) {
-			var size 		= this.sizes[this.data.options.size || 'm'];
-			var fontSize 	= this.data.options.fontSize || 13;
-			this.area  		= document.createElement('textarea');
-			document.body.insertBefore(this.area, document.body.firstChild);
+        this.reportSync();
 
-			this.area.name  = '"Chrome Notepad: A simple notes app for Chrome';
-			this.area.placeholder = ''
-			this.area.style.width = size[1] + 'em';
-			this.area.style.height = size[2] + 'em';
+        if(self.collapsed) {
+            $(".rpanel").css({width : "100%"});
+            $(".collapse-action").removeClass("collapse-arrow").addClass("expand-arrow");
+        }
 
-			this.area.style.fontSize = fontSize + 'px';
 
-			this.area 		= document.getElementsByTagName('TEXTAREA')[0];
-			this.area.value = this.data.content || '';
+		this.$textArea.val(this.data && this.data.content || "");
 
-			// NOT FOR NOW
-			if(0 && this.data.size) {
-				this.area.style.height  = this.data.size.height + 'px';
-				this.area.style.width  = this.data.size.width + 'px';
-			}
+        this.checkIfBookmarkExists("CuteNotepad",function(data) {
 
-			this.area.addEventListener('keyup', function(event) {
-				Ext.save(Ext.area.value);
-				Ext.getSelection();
+            //This means bookmark is found for this extension
+            if(data) {
 
-			}, false);
+                self.bookmarkData = data;
+                self.renderFolders(function(bookmarkTree) {
 
-			this.area.addEventListener('mouseup', function(event) {
-				Ext.getSelection(true);
-			});
+                    $(".folder-name").eq(0).addClass("active");
+                    content = bookmarkTree[0] && bookmarkTree[0].url && bookmarkTree[0].url.replace("data:text/plain;charset=UTF-8,", "") || "";
+                    $("textarea").val(self.removeLineBreaks(content) || "");
 
-			this.area.focus();
+                    if(!bookmarkTree.length) {
+                        //Means there is a Root bookmark but no notes. So lets create one note:
+                        content = self.data && self.data.content || "";
+                        $("textarea").val(content);
 
-			// Restore selection and scroll
-			if(this.data.selection || this.data.scroll) {
+                        self.createNote(content, function(note) {
+                            self.selectedNoteId = note.id;
+                            self.renderFolders(function() {
+                                $(".folder-name[data-bid='"+self.selectedNoteId+"']").addClass("active");
+                                $("textarea").focus();
+                            });
+                        });
 
-                var self = this;
+                    } else {
 
-                setTimeout(function () {
-                    if (self.data.selection) {
-				        self.area.setSelectionRange(self.data.selection.start, self.data.selection.end)
+                        if($(".folder-name[data-bid='"+self.selectedNoteId+"']").length) {
+                            $(".folder-name[data-bid='"+self.selectedNoteId+"']").trigger("click");
+                        } else {
+                            self.selectedNoteId = bookmarkTree[0].id;
+                            $(".folder-name[data-bid='"+self.selectedNoteId+"']").trigger("click");
+                        }
+
+                        $("textarea").focus();
                     }
-                    if (self.data.scroll) {
-                        self.area.scrollLeft        = self.data.scroll.left;
-                        self.area.scrollTop         = self.data.scroll.top;
+
+                });
+
+            } else {
+
+                //No bookmark found, hence create one
+                chrome.bookmarks.create({"title" : "CuteNotepad"}, function(newFolder) {
+
+                    content = self.data && self.data.content || "";
+                    self.bookmarkData = newFolder;
+                    self.createNote(content, function(note) {
+
+                        self.renderFolders(function (bookmarksTree) {
+                            if(bookmarksTree && bookmarksTree[0]) {
+
+                                self.selectedNoteId = note.id;
+                            }
+                            $(".folder-name").eq(0).addClass("active");
+                            $("textarea").focus();
+                        });
+                    });
+
+                });
+            }
+
+        });
+
+        this.bindEvents();
+	},
+
+    hightlightSelected : function () {
+        var self = this;
+        $(".folder-name").removeClass("active");
+        $(".folder-name[data-bid='"+self.selectedNoteId+"']").addClass("active");
+    },
+
+    bindEvents : function() {
+        var self = this;
+        this.$textArea.on("keyup", function() {
+            self.save(self.$textArea.val());
+        });
+
+        $(".newNoteBtn").on("click", function() {
+            var content = "";
+            $("textarea").val("");
+            chrome.bookmarks.create({
+                    parentId: self.bookmarkData.id,
+                    title : "New Note",
+                    url : "data:text/plain;charset=UTF-8,"
+            }, function (data) {
+                self.selectedNoteId = data.id;
+                self.renderFolders(function() {
+                    self.hightlightSelected();
+                });
+            });
+        });
+
+        $(".collapse-action").on("click", function() {
+            var $this = $(this);
+            if($this.hasClass("expand-arrow")) {
+                $this.removeClass("expand-arrow").addClass("collapse-arrow");
+                $(".rpanel").animate({width : "620px"});
+                self.collapsed = false;
+            } else {
+                $this.removeClass("collapse-arrow").addClass("expand-arrow");
+                $(".rpanel").animate({width : "100%"});
+                self.collapsed = true;
+            }
+            self.upsertCollapse();
+        });
+
+        $(".folderMenu").delegate(".folder-name", "click", function () {
+            var $this = $(this);
+            $(".folder-name").removeClass("active");
+            $this.addClass("active");
+            self.selectedNoteId = $this.attr("data-bid");
+            self.loadNotebyId($this.attr("data-bid"));
+        });
+
+        $(".delete-action").on("click", function() {
+            chrome.bookmarks.remove(self.selectedNoteId, function() {
+                console.log("Note Deleted");
+                self.renderFolders(function(children) {
+                    if(children.length) {
+                        //Means we have more notes, so we can bow focus on the first one
+                        $(".folder-name").eq(0).trigger("click");
+                    } else {
+                        //No Notes found. No lets create a default one.
+                        self.createNote("", function() {
+                            self.renderFolders(function() {
+
+                            });
+                            $("textarea").val("");
+                        });
+
                     }
-                }, 100);
-			}
+                });
+            })
+        });
+
+        $(".folder-search").keyup(function(evt) {
+            var $this = $(this);
+            var value = $this.val().trim();
+
+            self.searchFolders(value);
+        });
+
+    },
+
+    searchFolders : function(value) {
+        var self = this;
+        var subset = self.children.filter(function(item) {
+            return ~item.url.toLowerCase().indexOf(value.toLowerCase()) || ~item.title.toLowerCase().indexOf(value.toLowerCase());
+        });
+
+        $('.folder-items').empty();
+
+        subset.forEach(function(item) {
+            var title = item.title && item.title.substr(0.15) || "New note";
+            $('.folder-items').append("<div class = 'folder-name' data-bid = '"+item.id+"'>"+title+"</div>");
+        });
+    },
+    createNote : function(content, cb) {
+        var self = this;
+        chrome.bookmarks.create({
+            parentId : self.bookmarkData.id,
+            title :  content.substr(0, 15) || "New note",
+            url : "data:text/plain;charset=UTF-8," + self.addLineBreaks(content)
+        }, function(note) {
+            self.selectedNoteId = note.id;
+            cb && cb(note);
+        });
+    },
 
 
-			this.reportUpdate();
+    checkIfBookmarkExists : function(name, cb) {
+        var bookmarkTreeNodes = chrome.bookmarks.search(name, function (bookmarkTreeNodes) {
+            cb(bookmarkTreeNodes[0]);
+        });
 
-			this.reportSync();
+    },
 
+    loadNotebyId : function(bookmarkId) {
+        var self = this;
+        chrome.bookmarks.getSubTree(this.bookmarkData.id, function(bookmarkTreeNodes) {
 
-			chrome.extension.onRequest.addListener(function(req, sender, sendResponse) {
+            var bookmark = bookmarkTreeNodes[0].children.filter(function(item) {
+                return item.id === bookmarkId;
+            });
 
-				if(req.action) {
-					switch(req.action) {
-						case 'reloadContent':
-							// Timeout is needed for this dev version :)
-							setTimeout(function() {
-								Ext.load();
-								Ext.area = window.document.getElementsByTagName('TEXTAREA')[0];
-								if(Ext.area) {
-									Ext.area.value = Ext.data.content;
-									if(Ext.data.selection) {
-										Ext.area.setSelectionRange(Ext.data.selection.start, Ext.data.selection.end);
-									}
-
-									if(Ext.data.scroll) {
-										Ext.area.scrollLeft	 	= Ext.data.scroll.left;
-										Ext.area.scrollTop		= Ext.data.scroll.top;
-									}
-
-								}
-
-								Ext.reportUpdate();
-							}, 100);
-							break;
-					}
-				}
-
-			});
+            var content = bookmark[0] && bookmark[0].url || "";
+                content = content.replace("data:text/plain;charset=UTF-8,", "");
+                content = self.removeLineBreaks(content);
+            $("textarea").val(content);
+        });
+    },
 
 
-		} else {
-			// Background
+    renderFolders : function(cb) {
+        var self = this;
+        var title = "";
+        chrome.bookmarks.getSubTree(this.bookmarkData.id, function(bookmarkTreeNodes) {
+            $('.folder-items').empty();
+            self.children = bookmarkTreeNodes[0].children;
+            bookmarkTreeNodes[0].children.forEach(function(item) {
+                title = item.title && item.title.substr(0.15) || "New note";
+                $('.folder-items').append("<div class = 'folder-name' data-bid = '"+item.id+"'>"+title+"</div>");
+            });
+            self.hightlightSelected();
+            cb && cb(bookmarkTreeNodes[0].children);
+        });
+    },
+    removeLineBreaks : function(inStr) {
+        return inStr.replace(/<br \/>/g, "\n");
+    },
 
-			this.sync = new BSync({
-				getUpdate	: function() {
-					Ext.load();
-					return Ext.data.updated;
-				},
+    addLineBreaks : function(inStr) {
+        return inStr.replace(/\r\n?|\n/g, "<br />");
+    },
+    //Saves data to Bookmarks
+    save : function(content) {
 
-				onRead		: function(json, bookmark) {
-					Ext.load();
-					// Only on reads
-					Ext.data.synced		= Ext.data.updated = this.syncedAt;
+        var self = this;
+        clearTimeout(this.saveTimer);
+        this.saveTimer = setTimeout(function() {
 
-					Ext.data.content	= json.content;
-					Ext.data.updated	= json.updated;
-					Ext.data.selection	= json.selection;
-					Ext.data.scroll		= json.scroll;
+            if(content !== undefined && content !== self.data['content']) {
+                self.data['content'] 	= content;
+                self.data.updated 		= new Date().getTime();
+                self.data.selectedNoteId  = self.selectedNoteId;
+                self.data.collapsed = self.collapsed;
+                self.data.synced  = +(new Date());
+            }
 
-					Ext.debug( 'LOADED DATA IS: ');
-					Ext.debug(Ext.data);
-					Ext.save();
+            localStorage['data'] 	= JSON.stringify(self.data);
 
-					Ext.sendRequest({
-						'action'	: 'reloadContent'
-					});
-				},
-
-				onWrite		: function() {
-					// We can add some tests here (before writing)
-					// If we want to :)
-					Ext.load();
-					this.write({
-						'content'	: (Ext.data['content'] || '').slice(0, 2000), // Max 2k
-						'updated'	: Ext.data.updated,
-						'selection'	: Ext.data.selection,
-						'scroll'	: Ext.data.scroll
-					});
-
-					//console.log('writing ' + Ext.data['content'] );
-				}
-			});
-
-
-			// // Start it or not.
-			if(this.data.options && this.data.options.sync || this.data.options.sync === undefined) {
-			 	this.sync.start();
-			}
-
-		}
+            chrome.bookmarks.update(self.selectedNoteId, {
+                title : content.substr(0, 15) || "New Note",
+                url   : "data:text/plain;charset=UTF-8," + self.addLineBreaks(content)
+            }, function() {
+                console.log("Updated Note");
+                self.renderFolders(function (bookmarksTree) {
+                    self.searchFolders($(".folder-search").val());
+                    self.hightlightSelected();
+                });
+            });
 
 
-		return this;
-	},
+        }, 500);
 
-
-	getDT						: function(timestamp) {
-
-		var string = 'N/A';
-		var days, hours, minutes, seconds, diff;
-
-		if(timestamp) {
-            diff = Math.round( (new Date().getTime() - timestamp) / 1000 ),
-            hours = Math.round(diff/3600);
-
-			if( diff == 0) {
-				string = 'Just now'
-			} else if( diff  < 60  ) {
-				string = diff+ ' second' + (diff > 1 ? 's' : '') + ' ago'
-			} else if (diff > 60 && diff < 3600) {
-				minutes 	= Math.round(diff/60);
-				seconds 	= diff % 60;
-				string	 	= Math.round(diff / 60) + ' minute'+(Math.round(diff / 60) > 1 ? 's' : '')+' ago';
-			} else if (diff > 3600 && hours < 48) {
-				string 		= hours + ' hour'  + (hours > 1 ? 's' : '') + ' ago';
-			} else {
-				string 		= 'Long time ago'
-			}
-		}
-
-		return string;
-	},
-
-
-	reportSync					: function() {
-		var sync = document.getElementById('sync');
-		if(this.data.options.sync === undefined) {
-			this.data.options.sync = true;
-		}
-
-		if(!this.data.options || !this.data.options.sync) {
-
-			sync.innerHTML = 'Sync is off';
-		} else {
-			if(!this.data.options.sync)  {
-
-				sync.innerHTML = 'Sync is off'
-			} else {
-				sync.innerHTML	= 'Synced: ' + this.getDT(this.data.synced);
-			}
-		}
-		return this;
-	},
-
-
-	reportUpdate				: function() {
-		// Handle update
-		var updated 	= document.getElementById('updated');
-		if(!updated || !this.data.updated) {
-			return false;
-		}
-
-
-
-		updated.innerHTML = 'Updated: ' + this.getDT(this.data.updated);
-
-	},
-
-	getSelection				: function(getSize) {
-		this.data.selection = {
-			'start'	: this.area.selectionStart,
-			'end'	: this.area.selectionEnd
-		}
-
-		this.data.scroll	= {
-			'left'	: this.area.scrollLeft,
-			'top'	: this.area.scrollTop
-		}
-
-
-
-		// NOT FOR NOW
-		if(0)
-		if(getSize) {
-			this.data.size = {
-				'width'		: this.area.clientWidth - 2,
-				'height' 	: this.area.clientHeight - 2
-			}
-		}
-
-
-		Ext.save();
-	},
-
-
-
-	sendRequest	: function(obj) {
-		chrome.extension.sendRequest(obj);
-		return this;
-	},
-
-	debug		: function(arg) {
-		if(!this.debugOn)	 {
-			return this;
-		}
-
-	},
-
-	load		: function() {
+    },
+    upsertCollapse : function() {
+        try {
+            this.data.collapsed = this.collapsed;
+        }
+        catch(e) {
+            console.info("Error "+ e.message);
+        }
+        localStorage['data'] 	= JSON.stringify(this.data);
+    },
+	load : function() {
 		if(localStorage['data']) {
 			try {
-				this.data 			= JSON.parse(localStorage['data'])
+				this.data = JSON.parse(localStorage['data']);
+                this.selectedNoteId = this.data.selectedNoteId;
+                this.collapsed = this.data.collapsed;
 			} catch(ex) {
-				this.data			 = null;
+				this.data = null;
 			}
 		}
 
@@ -304,7 +316,7 @@ Ext = {
 					'height': 80
 				},
 				'options'	: {
-					'sync'	: false
+					'sync'	: true
 				}
 			}
 		}
@@ -316,22 +328,44 @@ Ext = {
 		}
 
 
-
 		return this;
 	},
 
-	save		: function(content) {
-		if(content !== undefined && content !== this.data['content']) {
-			this.data['content'] 	= content;
-			Ext.data.updated 		= new Date().getTime();
-		}
-		localStorage['data'] 	= JSON.stringify(this.data);
-		return this;
-	}
+	reportSync : function() {
+        $(".sync").html(this.getDT(this.data.synced))
+	},
+
+    getDT : function(timestamp) {
+
+        var string = 'N/A';
+        var days, hours, minutes, seconds, diff;
+
+        if(timestamp) {
+            diff = Math.round( (new Date().getTime() - timestamp) / 1000 ),
+                hours = Math.round(diff/3600);
+
+            if( diff == 0) {
+                string = 'Just now'
+            } else if( diff  < 60  ) {
+                string = diff+ ' second' + (diff > 1 ? 's' : '') + ' ago'
+            } else if (diff > 60 && diff < 3600) {
+                minutes 	= Math.round(diff/60);
+                seconds 	= diff % 60;
+                string	 	= Math.round(diff / 60) + ' minute'+(Math.round(diff / 60) > 1 ? 's' : '')+' ago';
+            } else if (diff > 3600 && hours < 48) {
+                string 		= hours + ' hour'  + (hours > 1 ? 's' : '') + ' ago';
+            } else {
+                string 		= 'Long time ago'
+            }
+        }
+
+        return string;
+    },
 
 }
 
 
-if (Ext.inPopup) {
-    Ext.initialize();
-}
+window.onload = function () {
+    $(".folder-name").eq(0).addClass("active");
+};
+Ext.initialize();

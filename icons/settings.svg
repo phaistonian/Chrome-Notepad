@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="16px" height="15px" viewBox="0 0 16 15" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>Icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M2.30146847,9.19079159 L5.47174711,9.19079159 L5.47174711,13.1489486 C5.47174711,14.0269878 4.76815953,14.7387792 3.88660779,14.7387792 L3.88660779,14.7387792 C3.01115952,14.7387792 2.30146847,14.0361227 2.30146847,13.1489486 L2.30146847,9.19079159 Z" id="path-1"></path>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="3.17027864" height="5.54798762" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <path d="M12.4091476,1.67134772 C12.4091476,1.11735311 12.8563765,0.66825174 13.4037335,0.66825174 L13.7922708,0.66825174 C14.3415654,0.66825174 14.7868566,1.1090654 14.7868566,1.67134772 L14.7868566,3.83853038 L12.4091476,3.83853038 L12.4091476,1.67134772 Z" id="path-3"></path>
+        <mask id="mask-4" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="2.37770898" height="3.17027864" fill="white">
+            <use xlink:href="#path-3"></use>
+        </mask>
+        <path d="M8.42345544,2.12683251 L10.8011644,2.12683251 L10.8011644,14.9142122 C10.8011644,15.5724596 10.2734737,16.1060745 9.61230993,16.1060745 L9.61230993,16.1060745 C8.95572372,16.1060745 8.42345544,15.5751418 8.42345544,14.9142122 L8.42345544,2.12683251 Z" id="path-5"></path>
+        <mask id="mask-6" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="2.37770898" height="13.979242" fill="white">
+            <use xlink:href="#path-5"></use>
+        </mask>
+        <path d="M0.961966834,5.54474782 C0.64954929,5.23233028 0.643140526,4.71954505 0.939558215,4.40791948 L4.21214455,0.967431202 C4.51218615,0.651995787 5.11214409,0.396284864 5.55495012,0.396284869 L8.31501881,0.396284901 C8.75658825,0.396284906 8.86857147,0.655480208 8.57350441,0.966400364 L3.17905694,6.65067589 C2.88024516,6.96554196 2.38954132,6.97232231 2.07232835,6.65510934 L0.961966834,5.54474782 L0.961966834,5.54474782 Z" id="path-7"></path>
+        <mask id="mask-8" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="8.015495" height="6.49365604" fill="white">
+            <use xlink:href="#path-7"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard" transform="translate(-1703.000000, -369.000000)" stroke="#35424C">
+            <g id="Group-16" transform="translate(1512.000000, 22.000000)">
+                <g id="Group-8">
+                    <g id="Icon" transform="translate(191.000000, 347.000000)">
+                        <use id="Line-22" mask="url(#mask-2)" stroke-width="2" stroke-linecap="square" transform="translate(3.886608, 11.964785) rotate(-315.000000) translate(-3.886608, -11.964785) " xlink:href="#path-1"></use>
+                        <path d="M6.51803974,10.6770512 L6.51803974,7.98965567" id="Line-21" stroke-linecap="round" stroke-linejoin="round" transform="translate(6.518040, 9.333353) rotate(-315.000000) translate(-6.518040, -9.333353) "></path>
+                        <path d="M10.6169685,7.86510364 L10.6169685,2.60374581" id="Line-20" stroke-linecap="round" stroke-linejoin="round" transform="translate(10.616968, 5.234425) rotate(-315.000000) translate(-10.616968, -5.234425) "></path>
+                        <path d="M3.25818468,11.404354 L5.63589366,11.404354" id="Line-19" stroke-linecap="square" transform="translate(4.447039, 11.404354) rotate(-315.000000) translate(-4.447039, -11.404354) "></path>
+                        <use id="Line-18" mask="url(#mask-4)" stroke-width="2" stroke-linecap="square" transform="translate(13.598002, 2.253391) rotate(-315.000000) translate(-13.598002, -2.253391) " xlink:href="#path-3"></use>
+                        <use id="Line-17" mask="url(#mask-6)" stroke-width="2" stroke-linecap="square" transform="translate(9.612310, 9.116454) rotate(-45.000000) translate(-9.612310, -9.116454) " xlink:href="#path-5"></use>
+                        <use id="Line-16" mask="url(#mask-8)" stroke-width="2" stroke-linecap="square" xlink:href="#path-7"></use>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

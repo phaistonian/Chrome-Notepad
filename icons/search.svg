@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 42 (36781) - http://www.bohemiancoding.com/sketch -->
+    <title>Icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M10.5622252,8.83932705 L14.979414,13.2565159 C15.4729535,13.7500553 15.4765917,14.5466026 14.9798587,15.0433356 C14.4865649,15.5366294 13.6923719,15.5422238 13.1902978,15.0401497 L8.75843294,10.6082848" id="path-1"></path>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="6.59255718" height="6.57567914" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <circle id="path-3" cx="5.89473684" cy="5.89473684" r="5.89473684"></circle>
+        <mask id="mask-4" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="11.7894737" height="11.7894737" fill="white">
+            <use xlink:href="#path-3"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linecap="square">
+        <g id="Artboard" transform="translate(-1661.000000, -58.000000)" stroke-width="2">
+            <g id="Group-16" transform="translate(1512.000000, 22.000000)">
+                <g id="Group-8">
+                    <g id="Group-10" transform="translate(5.000000, 31.000000)">
+                        <g id="Icon" transform="translate(144.000000, 5.000000)">
+                            <use id="Line-44" stroke="#35424C" mask="url(#mask-2)" xlink:href="#path-1"></use>
+                            <use id="Line-43" stroke="#36434D" mask="url(#mask-4)" xlink:href="#path-3"></use>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
