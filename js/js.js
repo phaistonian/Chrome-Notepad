@@ -50,6 +50,7 @@ Ext = {
                         self.createNote(content, function(note) {
                             self.selectedNoteId = note.id;
                             self.renderFolders(function() {
+                                $(".folder-name").removeClass("active");
                                 $(".folder-name[data-bid='"+self.selectedNoteId+"']").addClass("active");
                                 $("textarea").focus();
                             });
@@ -163,6 +164,7 @@ Ext = {
             $this.addClass("active");
             self.selectedNoteId = $this.attr("data-bid");
             self.loadNotebyId($this.attr("data-bid"));
+            self.upsertSelectedNote();
         });
 
         $(".delete-action").on("click", function() {
@@ -297,6 +299,15 @@ Ext = {
         }, 500);
 
     },
+    upsertSelectedNote : function() {
+        try {
+            this.data.selectedNoteId = this.selectedNoteId;
+        }
+        catch(e) {
+            console.info("Error "+ e.message);
+        }
+        localStorage['data'] 	= JSON.stringify(this.data);
+    },
     upsertCollapse : function() {
         try {
             this.data.collapsed = this.collapsed;
@@ -386,9 +397,6 @@ Ext = {
 }
 
 
-window.onload = function () {
-    $(".folder-name").eq(0).addClass("active");
-};
 
 if(location.href.indexOf('popup.html') !== -1) {
     Ext.initialize();
