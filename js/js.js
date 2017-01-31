@@ -28,7 +28,7 @@ Ext = {
         }
 
 
-		this.$textArea.val(this.data && this.data.content || "");
+		this.$textArea.val(this.data && decodeURIComponent(this.data.content) || "");
 
         this.checkIfBookmarkExists("CuteNotepad",function(data) {
 
@@ -45,7 +45,7 @@ Ext = {
                     if(!bookmarkTree.length) {
                         //Means there is a Root bookmark but no notes. So lets create one note:
                         content = self.data && self.data.content || "";
-                        $("textarea").val(content);
+                        $("textarea").val(decodeURIComponent(content));
 
                         self.createNote(content, function(note) {
                             self.selectedNoteId = note.id;
@@ -241,7 +241,7 @@ Ext = {
             var content = bookmark[0] && bookmark[0].url || "";
                 content = content.replace("data:text/plain;charset=UTF-8,", "");
                 content = self.removeLineBreaks(content);
-            $("textarea").val(content);
+                $("textarea").val(content);
         });
     },
 
@@ -261,7 +261,7 @@ Ext = {
         });
     },
     removeLineBreaks : function(inStr) {
-        return inStr.replace(/<br \/>/g, "\n");
+        return decodeURIComponent(inStr.replace(/<br \/>/g, "\n"));
     },
 
     addLineBreaks : function(inStr) {

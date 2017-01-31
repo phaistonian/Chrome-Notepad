@@ -47,7 +47,6 @@
 		height : 100vh;
 	}
 	textarea {
-		white-space: pre;
 		width : 100%;
 		max-width : 100%;
 		outline: none;
@@ -58,6 +57,7 @@
 		height: 330px;
 		resize: none;
 		overflow: auto;
+
 	}
 	.folderMenu {
 		width: 180px;
@@ -180,7 +180,7 @@
 					<div class = "newNoteBtn">New Note</div>
 				</div>
 			</div>
-			<textarea id = "notepad" placeholder="Write something here !!"></textarea>
+			<textarea id = "notepad" placeholder="Write something here !!" wrap="hard"></textarea>
 
 			<div class="footer-strip">
 				<div>Last synchronization on : <span class="sync"></span></div>
