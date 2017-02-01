@@ -28,7 +28,7 @@ Ext = {
         }
 
 
-		this.$textArea.val(this.data && decodeURIComponent(this.data.content) || "");
+		this.$textArea.val(this.data && decodeURIComponent(this.data.content) || "").focus();
 
         this.checkIfBookmarkExists("CuteNotepad",function(data) {
 
@@ -40,12 +40,12 @@ Ext = {
 
                     $(".folder-name").eq(0).addClass("active");
                     content = bookmarkTree[0] && bookmarkTree[0].url && bookmarkTree[0].url.replace("data:text/plain;charset=UTF-8,", "") || "";
-                    $("textarea").val(self.removeLineBreaks(content) || "");
+                    $("textarea").val(self.removeLineBreaks(content) || "").focus();
 
                     if(!bookmarkTree.length) {
                         //Means there is a Root bookmark but no notes. So lets create one note:
                         content = self.data && self.data.content || "";
-                        $("textarea").val(decodeURIComponent(content));
+                        $("textarea").val(decodeURIComponent(content)).focus();
 
                         self.createNote(content, function(note) {
                             self.selectedNoteId = note.id;
@@ -128,7 +128,7 @@ Ext = {
 
         $(".newNoteBtn").on("click", function() {
             var content = "";
-            $("textarea").val("");
+            $("textarea").val("").focus();
             chrome.bookmarks.create({
                     parentId: self.bookmarkData.id,
                     title : "New Note",
@@ -180,7 +180,7 @@ Ext = {
                             self.renderFolders(function() {
 
                             });
-                            $("textarea").val("");
+                            $("textarea").val("").focus();
                         });
 
                     }
@@ -241,7 +241,7 @@ Ext = {
             var content = bookmark[0] && bookmark[0].url || "";
                 content = content.replace("data:text/plain;charset=UTF-8,", "");
                 content = self.removeLineBreaks(content);
-                $("textarea").val(content);
+                $("textarea").val(content).focus();
         });
     },
 
@@ -257,6 +257,7 @@ Ext = {
                 $('.folder-items').append("<div class = 'folder-name' data-bid = '"+item.id+"'>"+title+"</div>");
             });
             self.hightlightSelected();
+            $("textarea").focus();
             cb && cb(bookmarkTreeNodes[0].children);
         });
     },
@@ -395,7 +396,12 @@ Ext = {
     },
 
 }
-
+document.addEventListener('DOMContentLoaded', function() {
+    $("textarea").focus();
+    setTimeout(function() {
+        $(".folder-search").removeAttr("disabled")
+    },500)
+}, false);
 
 
 if(location.href.indexOf('popup.html') !== -1) {
