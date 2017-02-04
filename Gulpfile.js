@@ -12,7 +12,7 @@ const getPackageJson = function () {
 };
 
 gulp.task('bump', () => gulp.src('./manifest.json')
-  .pipe(bump({ type: 'minor' }))
+  .pipe(bump({ type: 'patch' }))
   .pipe(gulp.dest('./')));
 
 gulp.task('remove', cb => {

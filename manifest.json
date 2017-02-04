@@ -4,7 +4,7 @@
   "background": {
       "scripts": ["js/jquery.min.js","js/js.js","background.js"]
    },
-  "options_page"      : "options.html",
+    "options_page"      : "options.html",
 
   "browser_action"     : {
     "default_icon"  : "icons/19x19-local.png",
@@ -26,5 +26,5 @@
   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
   "update_url": "http://clients2.google.com/service/update2/crx",
   "manifest_version": 2,
-  "version": "5.2.0"
+  "version": "5.2.1"
 }
