@@ -1,15 +1,13 @@
 {
   "name": "Chrome-Notepad",
-  "version": "5.2.0",
+  "version": "5.2.1",
   "main": "index.js",
   "repository": "https://github.com/phaistonian/Chrome-Notepad.git",
   "author": "George Papadakis <phaistonian@gmail.com>",
   "license": "MIT",
-
   "scripts": {
     "build": "npm version patch && gulp && open https://chrome.google.com/webstore/developer/dashboard && open ."
   },
-
   "devDependencies": {
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-bump": "*",
