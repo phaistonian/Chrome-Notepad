@@ -320,7 +320,7 @@ Ext = {
 
             subset.forEach(function(item) {
                 var title = item.title && item.title.substr(0, 15);
-                $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'>"+title+"<span class='actions'><span class='restore' title='RESTORE'>R</span><span class='delete' title='DELETE'>X</span></span></div>");
+                $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'>"+title+"<span class='actions'><span class='restore' title='RESTORE'>R</span>&nbsp;<span class='delete' title='DELETE'>X</span></span></div>");
             });
         }
     },
@@ -403,7 +403,7 @@ Ext = {
             var trashList = data[0].children;
             trashList.forEach(function(item){
                 title = item.title && item.title.substr(0, 15);
-               $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'>"+title+"<span class='actions'><span class='restore' title='RESTORE'>R</span>&nbsp;<span class='delete' title='DELETE'>X</span></span></div>"); 
+                $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'>"+title+"<span class='actions'><span class='restore' title='RESTORE'>R</span>&nbsp;<span class='delete' title='DELETE'>X</span></span></div>"); 
             });
         });
         cb && cb();
