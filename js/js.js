@@ -13,7 +13,9 @@ Ext = {
 		if(this.initialized === true) return;
 
         this.initialized = true;
-
+        this.mode = "NOTES_ACTIVE";
+        this.activeNotes_searchStr = "";
+        this.inactiveNotes_searchStr = "";
         this.loadConfig();
         this.$textArea   = $("#notepad");
 
@@ -36,37 +38,44 @@ Ext = {
             if(data) {
 
                 self.bookmarkData = data;
-                self.renderFolders(function(bookmarkTree) {
+                self.renderFolders(function(cuteNotepadChildren) {
 
                     $(".folder-name").eq(0).addClass("active");
-                    content = bookmarkTree[0] && bookmarkTree[0].url && bookmarkTree[0].url.replace("data:text/plain;charset=UTF-8,", "") || "";
+                    content = cuteNotepadChildren[0] && cuteNotepadChildren[0].url && cuteNotepadChildren[0].url.replace("data:text/plain;charset=UTF-8,", "") || "";
                     $("textarea").val(self.removeLineBreaks(content) || "").focus();
 
-                    if(!bookmarkTree.length) {
+                    if(!cuteNotepadChildren.length) {
                         //Means there is a Root bookmark but no notes. So lets create one note:
-                        content = self.data && self.data.content || "";
-                        $("textarea").val(decodeURIComponent(content)).focus();
-
-                        self.createNote(content, function(note) {
-                            self.selectedNoteId = note.id;
-                            self.renderFolders(function() {
-                                $(".folder-name").removeClass("active");
-                                $(".folder-name[data-bid='"+self.selectedNoteId+"']").addClass("active");
-                                $("textarea").focus();
-                            });
-                        });
+                        content = this.data && this.data.content || "";
+                        self.newNoteInitiator(content);
 
                     } else {
 
                         if($(".folder-name[data-bid='"+self.selectedNoteId+"']").length) {
                             $(".folder-name[data-bid='"+self.selectedNoteId+"']").trigger("click");
                         } else {
-                            self.selectedNoteId = bookmarkTree[0].id;
+                            self.selectedNoteId = cuteNotepadChildren[0].id;
                             $(".folder-name[data-bid='"+self.selectedNoteId+"']").trigger("click");
                         }
 
                         $("textarea").focus();
                     }
+                    self.checkIfBookmarkExists("trashedNotes", function(data) {
+                        if ( !data ) {
+                            //new subfolder: to hold deleted bookmarks
+                            chrome.bookmarks.create({"title": "trashedNotes", parentId: self.bookmarkData.id}, function(data){
+                                self.trashedFolderData = data;
+                                /*self.renderDeletedNotes(function(){
+
+                                });*/
+                            });
+                        } else {
+                            self.trashedFolderData = data;
+                            /*self.renderDeletedNotes(function(){
+
+                            });*/
+                        }
+                    });
 
                 });
 
@@ -86,6 +95,21 @@ Ext = {
                             }
                             $(".folder-name").eq(0).addClass("active");
                             $("textarea").focus();
+
+
+                            self.checkIfBookmarkExists("trashedNotes", function(data) {
+                                if ( !data ){
+                                    //new subfolder: to hold deleted bookmarks
+                                    chrome.bookmarks.create({"title": "trashedNotes", parentId: self.bookmarkData.id}, function(data){
+                                        self.trashedFolderData = data;
+                                        self.renderDeletedNotes(function(){
+
+                                        });
+                                    });
+                                } else {
+                                    self.trashedFolderData = data;
+                                }
+                            });
                         });
                     });
 
@@ -100,9 +124,16 @@ Ext = {
     loadConfig : function() {
         chrome.storage.sync.get({
             fontSize: "14px",
-            fontFamily: "default"
+            fontFamily: "default",
+            size : 300
         }, function(item) {
+            var height = Number(item.size);
+            
+                height = height > 600 || !height ? 300   : height;
 
+
+            $("body").height(height);
+            
             $("textarea").css({
                 "font-family" : item.fontFamily,
                 "font-size" : item.fontSize
@@ -116,8 +147,16 @@ Ext = {
         $(".folder-name[data-bid='"+self.selectedNoteId+"']").addClass("active");
     },
 
-    trackGoogleEvent : function() {
-        _gaq.push(['_trackEvent', "NoteCreated", 'clicked', "NoteCreated"]);
+    trackGoogleEvent : function(eventType) {
+        if ( eventType == "NOTE_CREATION" ) {
+            _gaq.push(['_trackEvent', "NoteCreated", 'clicked', "NoteCreated"]);
+        } else if ( eventType == "NOTE_SOFT_DELETION" ) {
+            _gaq.push(['_trackEvent', "NoteDeleted", 'clicked', "NoteDeleted"]);
+        } else if ( eventType == "NOTE_HARD_DELETION" ) {
+            _gaq.push(['_trackEvent', "NoteDeletetedForever", 'clicked', "NoteDeletetedForever"]);
+        } else if ( eventType == "NOTE_RESTORATION" ) {
+            _gaq.push(['_trackEvent', "NoteRestored", 'clicked', "NoteRestored"]);
+        }
     },
 
     bindEvents : function() {
@@ -137,11 +176,10 @@ Ext = {
                 self.selectedNoteId = data.id;
                 self.renderFolders(function() {
                     self.hightlightSelected();
-
                 });
             });
 
-            self.trackGoogleEvent();
+            self.trackGoogleEvent("NOTE_CREATION");
         });
 
         $(".collapse-action").on("click", function() {
@@ -163,29 +201,65 @@ Ext = {
             $(".folder-name").removeClass("active");
             $this.addClass("active");
             self.selectedNoteId = $this.attr("data-bid");
-            self.loadNotebyId($this.attr("data-bid"));
+            self.loadNotebyId($this.attr("data-bid"), false);
             self.upsertSelectedNote();
         });
 
         $(".delete-action").on("click", function() {
-            chrome.bookmarks.remove(self.selectedNoteId, function() {
-                console.log("Note Deleted");
-                self.renderFolders(function(children) {
-                    if(children.length) {
-                        //Means we have more notes, so we can bow focus on the first one
-                        $(".folder-name").eq(0).trigger("click");
+
+            // Get the next in order note's bookmark id, so that we make that active 
+            var nextNoteId = $(".folder-items .folder-name[data-bid="+self.selectedNoteId+"]").next().attr("data-bid");
+            $("textarea").val("");
+            chrome.bookmarks.move(self.selectedNoteId, {parentId:self.trashedFolderData.id}, function(data){
+               
+               self.trackGoogleEvent("NOTE_SOFT_DELETION");
+
+               self.renderFolders(function (bookmarksTree) {
+
+                    var $next;
+
+                    if ( !nextNoteId && $(".folder-items .folder-name").length ) {
+                        /*  The case when nextNode wasn't available because it was the last in list
+                            make the first one active in that case
+                        */
+                        $next = $(".folder-items .folder-name").eq(0);
+                        nextNoteId = $next.attr("data-bid");
+                    } else if ( !nextNoteId && !$(".folder-items .folder-name").length ) {
+                        /*  The case when no more active notes are present 
+                        */
+                        self.newNoteInitiator("");
                     } else {
-                        //No Notes found. No lets create a default one.
-                        self.createNote("", function() {
-                            self.renderFolders(function() {
-
-                            });
-                            $("textarea").val("").focus();
-                        });
-
+                        $next = $(".folder-items .folder-name[data-bid="+nextNoteId+"]");
                     }
+                    if ( $next ) {
+                        $next.addClass("active");
+                        self.selectedNoteId = nextNoteId;
+                        self.loadNotebyId(self.selectedNoteId);
+                        self.upsertSelectedNote();
+                    }
+                        
                 });
-            })
+            });
+        });
+
+        $(".trashed").click(function(){
+            $(".folder-search").val("");
+            $(".trashed").toggleClass("active");
+            if ( !$(".trash").hasClass("expanded") ) {
+                self.mode = "NOTES_INACTIVE";
+                $(".delete-action, .newNoteBtn, .collapse-action, .folder-items").hide();
+                $(".trash").addClass("expanded").show();
+                
+                self.renderDeletedNotes();
+                $(".trash-note-preview").show();
+            } else {
+                $(".trash").removeClass("expanded").hide();
+                self.mode = "NOTES_ACTIVE";
+                $(".trash").html("");
+                $(".trash-note-preview").hide();
+                $(".delete-action, .newNoteBtn, .collapse-action, .folder-items").show();
+                self.renderFolders();
+            }
         });
 
         $(".folder-search").keyup(function(evt) {
@@ -195,27 +269,74 @@ Ext = {
             self.searchFolders(value);
         });
 
+        $(".trash").delegate(".deleted-note-name", "click", function(event) {
+            $(".deleted-note-name").removeClass("active");
+            $(event.currentTarget).addClass("active");
+            var noteId = $(this).attr("data-bid");
+            if ( noteId ) {
+                self.loadNotebyId(noteId, true);   
+            }
+        });
+
+        $(".trash").delegate(".deleted-note-name .restore", "click", function() {
+            var $toRestore = $(this).parents(".deleted-note-name");
+            var noteId = $toRestore.attr("data-bid");
+            $(".trash-note-preview").html("");
+            $toRestore.remove();
+
+            chrome.bookmarks.move(noteId, {parentId:self.bookmarkData.id}, function(data) {
+                self.trackGoogleEvent("NOTE_RESTORATION");
+                title = data.title && data.title.substr(0, 15);
+                $('.folder-items').append("<div class = 'folder-name' data-bid = '"+data.id+"'>"+title+"</div>");
+            });
+        });
+
+        $(".trash").delegate(".deleted-note-name .delete", "click", function(){
+            var $noteToDelete = $(this).parents(".deleted-note-name");
+            var noteId = $noteToDelete.attr("data-bid");
+            chrome.bookmarks.remove(noteId, function() {
+                self.trackGoogleEvent("NOTE_HARD_DELETION");
+                $(".trash-note-preview").html("");
+                $noteToDelete.remove();
+            })
+        });
     },
 
     searchFolders : function(value) {
         var self = this;
-        var subset = self.children.filter(function(item) {
-            return ~item.url.toLowerCase().indexOf(value.toLowerCase()) || ~item.title.toLowerCase().indexOf(value.toLowerCase());
-        });
+        var subset;
+        if ( this.mode == "NOTES_ACTIVE") {
+            self.activeNotes_searchStr = value;
+            subset = self.activeNotes.filter(function(item) {
+                return ~item.url.toLowerCase().indexOf(value.toLowerCase()) || ~item.title.toLowerCase().indexOf(value.toLowerCase());
+            });
 
-        $('.folder-items').empty();
+            $('.folder-items').empty();
 
-        subset.forEach(function(item) {
-            var title = item.title && item.title.substr(0.15) || "New note";
-            $('.folder-items').append("<div class = 'folder-name' data-bid = '"+item.id+"'>"+title+"</div>");
-        });
+            subset.forEach(function(item) {
+                var title = item.title && item.title.substr(0, 15) || "New note";
+                $('.folder-items').append("<div class = 'folder-name' data-bid = '"+item.id+"'>"+title+"</div>");
+            });
+        } else {
+            self.inactiveNotes_searchStr = value;
+            subset = self.inactiveNotes.filter(function(item) {
+                return ~item.url.toLowerCase().indexOf(value.toLowerCase()) || ~item.title.toLowerCase().indexOf(value.toLowerCase());
+            });
+
+            $('.trash').empty();
+
+            subset.forEach(function(item) {
+                var title = item.title && item.title.substr(0, 10);
+                $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'><span>"+title+"</span><span class='actions'><span class='restore' title='Restore'></span><span class='delete' title='Delete Forever'></span></span></div>");
+            });
+        }
     },
     createNote : function(content, cb) {
         var self = this;
         chrome.bookmarks.create({
-            parentId : self.bookmarkData.id,
-            title :  content.substr(0, 15) || "New note",
-            url : "data:text/plain;charset=UTF-8," + self.addLineBreaks(content)
+            parentId    : self.bookmarkData.id,
+            title       :  content.substr(0, 15) || "New note",
+            url         : "data:text/plain;charset=UTF-8," + self.addLineBreaks(content)        
         }, function(note) {
             self.selectedNoteId = note.id;
             cb && cb(note);
@@ -230,19 +351,32 @@ Ext = {
 
     },
 
-    loadNotebyId : function(bookmarkId) {
+    loadNotebyId : function(bookmarkId, preview) {
         var self = this;
-        chrome.bookmarks.getSubTree(this.bookmarkData.id, function(bookmarkTreeNodes) {
+        if ( preview ) {
+            chrome.bookmarks.getSubTree(self.trashedFolderData.id, function(bookmarkTreeNodes) {
+                var bookmark = bookmarkTreeNodes[0].children.filter(function(item) {
+                    return item.id === bookmarkId;
+                });
 
-            var bookmark = bookmarkTreeNodes[0].children.filter(function(item) {
-                return item.id === bookmarkId;
+                var content = bookmark[0] && bookmark[0].url || "";
+                    content = content.replace("data:text/plain;charset=UTF-8,", "");
+                    content = self.removeLineBreaks(content);
+                    $(".trash-note-preview").html(content);
             });
+        } else {
+            chrome.bookmarks.getSubTree(self.bookmarkData.id, function(bookmarkTreeNodes) {
+                var bookmark = bookmarkTreeNodes[0].children.filter(function(item) {
+                    return item.id === bookmarkId;
+                });
 
-            var content = bookmark[0] && bookmark[0].url || "";
-                content = content.replace("data:text/plain;charset=UTF-8,", "");
-                content = self.removeLineBreaks(content);
-                $("textarea").val(content).focus();
-        });
+                var content = bookmark[0] && bookmark[0].url || "";
+                    content = content.replace("data:text/plain;charset=UTF-8,", "");
+                    content = self.removeLineBreaks(content);
+                    $("textarea").val(content).focus();
+            });
+        }
+            
     },
 
 
@@ -251,16 +385,56 @@ Ext = {
         var title = "";
         chrome.bookmarks.getSubTree(this.bookmarkData.id, function(bookmarkTreeNodes) {
             $('.folder-items').empty();
-            self.children = bookmarkTreeNodes[0].children;
+            self.activeNotes = [];
+            self.inactiveNotes = [];
             bookmarkTreeNodes[0].children.forEach(function(item) {
-                title = item.title && item.title.substr(0.15) || "New note";
-                $('.folder-items').append("<div class = 'folder-name' data-bid = '"+item.id+"'>"+title+"</div>");
+                if ( !item.children ) {
+                    item.deleted = item.deleted ? item.deleted : false;
+                    self.activeNotes.push(item);
+                    title = item.title && item.title.substr(0, 15) || "New note";
+                    $('.folder-items').append("<div class = 'folder-name' data-bid = '"+item.id+"'>"+title+"</div>");
+                } else {
+                    self.inactiveNotes = item.children;
+                }
             });
             self.hightlightSelected();
             $("textarea").focus();
             cb && cb(bookmarkTreeNodes[0].children);
         });
     },
+
+    renderDeletedNotes: function(cb){
+        var self = this;
+        chrome.bookmarks.getSubTree(this.trashedFolderData.id, function(data) {
+            $('.trash').empty();
+            var trashList = data[0].children;
+            trashList.forEach(function(item){
+                title = item.title && item.title.substr(0, 10);
+                $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'><span>"+title+"</span><span class='actions'><span class='restore' title='Restore'></span><span class='delete' title='Delete Forever'></span></span></div>"); 
+            });
+            cb && cb();
+        });
+        
+        
+    },
+
+    newNoteInitiator: function(content) {
+        var self = this;
+        $("textarea").val(decodeURIComponent(content)).focus();
+
+        this.createNote(content, function(note) {
+            self.selectedNoteId = note.id;
+            self.renderFolders(function() {
+                $(".folder-name").removeClass("active");
+                $(".folder-name[data-bid='"+self.selectedNoteId+"']").addClass("active");
+                $("textarea").focus();
+                if ( $(".folder-name").length == 1 ) {
+                    self.save(self.$textArea.val());
+                }
+            });
+        });
+    },
+
     removeLineBreaks : function(inStr) {
         return decodeURIComponent(inStr.replace(/<br \/>/g, "\n"));
     },
@@ -281,6 +455,7 @@ Ext = {
                 self.data.selectedNoteId  = self.selectedNoteId;
                 self.data.collapsed = self.collapsed;
                 self.data.synced  = +(new Date());
+                self.data.deleted = false;
             }
 
             localStorage['data'] 	= JSON.stringify(self.data);
@@ -289,7 +464,6 @@ Ext = {
                 title : content.substr(0, 15) || "New Note",
                 url   : "data:text/plain;charset=UTF-8," + self.addLineBreaks(content)
             }, function() {
-                console.log("Updated Note");
                 self.renderFolders(function (bookmarksTree) {
                     self.searchFolders($(".folder-search").val());
                     self.hightlightSelected();
@@ -322,6 +496,7 @@ Ext = {
 		if(localStorage['data']) {
 			try {
 				this.data = JSON.parse(localStorage['data']);
+                //this.selectedNote = this.data;
                 this.selectedNoteId = this.data.selectedNoteId;
                 this.collapsed = this.data.collapsed;
 			} catch(ex) {

@@ -24,6 +24,7 @@
 		padding: 0px;
 		margin: 0px;
 		width: 800px;
+		
 	}
 	.container {
 		width:  100%;
@@ -54,7 +55,7 @@
 		box-sizing: border-box;
 		padding: 15px;
 		font-size: 14px;
-		height: 330px;
+		height: 100%;
 		resize: none;
 		overflow: auto;
 
@@ -92,13 +93,11 @@
 	#footer #sync {
 		float: right;
 	}
-
-	.newNoteBtn {
+	.btn {
 		background-color: #00AB74;
 		border-radius: 100px;
 		color : #ffffff;
 		text-align: center;
-		width: 100px;
 		cursor: pointer;
 		padding: 5px;
 		height: 26px;
@@ -108,15 +107,18 @@
 		justify-content: center;
 		align-items: center;
 	}
+	.newNoteBtn {
+		width: 100px;
+	}
 
-	.folder-name {
+	.folder-name, .deleted-note-name {
 		font-size: 14px;
 		color : #32403C;
 		margin-top: 8px;
 		padding-left: 2px;
 		cursor: pointer;
 	}
-	.folder-name.active {
+	.folder-name.active, .deleted-note-name.active {
 		color : #00AB74;
 	}
 	.folder-search {
@@ -158,9 +160,68 @@
 		padding : 0px 10px;
 		border-top: 1px solid #dddddd;
 	}
-	.folder-items {
+	
+	.trash.expanded {
+		
+	}
+
+	.trashed {
+		height: 20px;
+		cursor: pointer;
+		background-color: inherit;
+		color : black;
+		border: 0.5px solid black;
+    	bottom: 5px;
+	}
+	.trashed.active {
+		margin-right: 5px;
+		color : #fff;
+		background-color: #00AB74;
+		border: none;
+	}
+	
+	.folder-items,.trash {
 		overflow-x: hidden;
-		overflow-y: auto;
+	    overflow-y: auto;
+	    height: 84vh;
+	    padding: 0 0 6px 0;
+	    margin-top: 11px;
+	}
+	.trash {
+		display: none;
+	}
+	.content-display {
+		position: relative;
+		flex: 1;
+		display: flex;
+	}
+	.trash-note-preview {
+		position: absolute;
+	    top: 0;
+	    background-color: #ffffff;
+	    height: 100%;
+	    width: 100%;
+	    padding: 15px;
+	    display: none;
+	}
+	.deleted-note-name {
+		display: flex;
+    	flex-direction: row;
+    	justify-content: space-between;
+	}
+	.restore {
+		background: url("./icons/restore.svg");
+		display: inline-block;
+		height : 16px;
+		width: 16px;
+		background-size: contain;
+	}
+	.delete {
+		background: url("./icons/delete_forever.svg");
+		display: inline-block;
+		height : 16px;
+		width: 16px;
+		background-size: contain;
 	}
 	</style>
 </head>
@@ -171,6 +232,10 @@
 		<div class="folderMenu">
 			<input disabled = "disabled" type="text" class = "folder-search search" placeholder="Search Notes.."/>
 			<div class="folder-items"></div>
+			<div class="trash"></div>
+			<div class="btn trashed">
+				<div>Recycle Bin</div>
+			</div>
 		</div>
 		<div class="rpanel">
 			<div class="header-strip">
@@ -178,11 +243,13 @@
 
 				<div class = "right-actions">
 					<div class="delete-action"></div>
-					<div class = "newNoteBtn">New Note</div>
+					<div class = "btn newNoteBtn">New Note</div>
 				</div>
 			</div>
-			<textarea autofocus = "true" id = "notepad" placeholder="Write something here !!" wrap="hard"></textarea>
-
+			<div class="content-display">
+				<textarea autofocus = "true" id = "notepad" placeholder="Write something here !!" wrap="hard"></textarea>
+				<div class="trash-note-preview"></div>
+			</div>
 			<div class="footer-strip">
 				<div>Last synchronization on : <span class="sync"></span></div>
 			</div>
