@@ -140,8 +140,16 @@ Ext = {
         $(".folder-name[data-bid='"+self.selectedNoteId+"']").addClass("active");
     },
 
-    trackGoogleEvent : function() {
-        _gaq.push(['_trackEvent', "NoteCreated", 'clicked', "NoteCreated"]);
+    trackGoogleEvent : function(eventType) {
+        if ( eventType == "NOTE_CREATION" ) {
+            _gaq.push(['_trackEvent', "NoteCreated", 'clicked', "NoteCreated"]);
+        } else if ( eventType == "NOTE_SOFT_DELETION" ) {
+            _gaq.push(['_trackEvent', "NoteDeleted", 'clicked', "NoteDeleted"]);
+        } else if ( eventType == "NOTE_HARD_DELETION" ) {
+            _gaq.push(['_trackEvent', "NoteDeletetedForever", 'clicked', "NoteDeletetedForever"]);
+        } else if ( eventType == "NOTE_RESTORATION" ) {
+            _gaq.push(['_trackEvent', "NoteRestored", 'clicked', "NoteRestored"]);
+        }
     },
 
     bindEvents : function() {
@@ -164,7 +172,7 @@ Ext = {
                 });
             });
 
-            self.trackGoogleEvent();
+            self.trackGoogleEvent("NOTE_CREATION");
         });
 
         $(".collapse-action").on("click", function() {
@@ -197,6 +205,8 @@ Ext = {
             $("textarea").val("");
             chrome.bookmarks.move(self.selectedNoteId, {parentId:self.trashedFolderData.id}, function(data){
                
+               self.trackGoogleEvent("NOTE_SOFT_DELETION");
+
                self.renderFolders(function (bookmarksTree) {
 
                     var $next;
@@ -267,7 +277,8 @@ Ext = {
             $(".trash-note-preview").html("");
             $toRestore.remove();
 
-            chrome.bookmarks.move(noteId, {parentId:self.bookmarkData.id}, function(data){
+            chrome.bookmarks.move(noteId, {parentId:self.bookmarkData.id}, function(data) {
+                self.trackGoogleEvent("NOTE_RESTORATION");
                 title = data.title && data.title.substr(0, 15);
                 $('.folder-items').append("<div class = 'folder-name' data-bid = '"+data.id+"'>"+title+"</div>");
             });
@@ -277,6 +288,7 @@ Ext = {
             var $noteToDelete = $(this).parents(".deleted-note-name");
             var noteId = $noteToDelete.attr("data-bid");
             chrome.bookmarks.remove(noteId, function() {
+                self.trackGoogleEvent("NOTE_HARD_DELETION");
                 $(".trash-note-preview").html("");
                 $noteToDelete.remove();
             })
