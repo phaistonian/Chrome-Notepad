@@ -15,8 +15,9 @@ Options = {
         }
 
         /* Sizes */
-        this.data.options.fontSize	= this.data.options.fontSize || '13px';
-        this.data.options.fontFamily = this.data.options.fontFamily || '-webkit-body';
+        this.data.options.fontSize	 = this.data.options.fontSize || '14px';
+        this.data.options.fontFamily = this.data.options.fontFamily || 'default';
+        this.data.options.size       = this.data.options.size || '300';
 
 
         if(this.data.options.fontSize) {
@@ -26,6 +27,11 @@ Options = {
 
         if(this.data.options.fontFamily) {
             this.select('font-family', this.data.options.fontFamily);
+        }
+
+        if(this.data.options.size) {
+            var numbered = Number(this.data.options.size);
+            document.querySelector("#size").value =  (numbered > 600 || !numbered) ? 600 : numbered;
         }
 
 
@@ -45,12 +51,14 @@ Options = {
         var sync 	= document.getElementById('sync');
         var fontSize 	= document.getElementById('font-size');
         var fontFamily = document.getElementById('font-family');
+        var size = document.getElementById('size');
 
         // Store
         //this.data 				= localStorage['data'] ? JSON.parse(localStorage['data']) : this.data;
         this.data.options.sync			= !!sync.checked;
         this.data.options.fontSize 		= fontSize.value;
-        this.data.options.fontFamily 	= fontFamily.value;
+        this.data.options.fontFamily    = fontFamily.value;
+        this.data.options.size 	        = size.value || 300;
 
         localStorage['data']	= JSON.stringify(this.data);
 
@@ -61,11 +69,12 @@ Options = {
 
         chrome.storage.sync.set({
             fontSize: fontSize.value,
-            fontFamily: fontFamily.value
+            fontFamily: fontFamily.value,
+            size : Number(size.value) > 600 ? 600 : Number(size.value)
         }, function() {
             setTimeout(function() {
                 say.style.display = 'none';
-            },2000);
+            },3000);
         });
 
     },

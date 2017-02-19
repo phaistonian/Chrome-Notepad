@@ -124,9 +124,16 @@ Ext = {
     loadConfig : function() {
         chrome.storage.sync.get({
             fontSize: "14px",
-            fontFamily: "default"
+            fontFamily: "default",
+            size : 300
         }, function(item) {
+            var height = Number(item.size);
+            
+                height = height > 600 || !height ? 300   : height;
 
+
+            $("body").height(height);
+            
             $("textarea").css({
                 "font-family" : item.fontFamily,
                 "font-size" : item.fontSize

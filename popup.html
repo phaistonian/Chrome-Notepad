@@ -24,6 +24,7 @@
 		padding: 0px;
 		margin: 0px;
 		width: 800px;
+		
 	}
 	.container {
 		width:  100%;
@@ -54,7 +55,7 @@
 		box-sizing: border-box;
 		padding: 15px;
 		font-size: 14px;
-		height: 330px;
+		height: 100%;
 		resize: none;
 		overflow: auto;
 
@@ -171,6 +172,8 @@
 		background-color: inherit;
 		color : black;
 		border: 0.5px solid black;
+		position: absolute;
+    	bottom: 5px;
 	}
 	.trashed.active {
 		margin-right: 5px;
@@ -191,6 +194,8 @@
 	}
 	.content-display {
 		position: relative;
+		flex: 1;
+		display: flex;
 	}
 	.trash-note-preview {
 		position: absolute;
