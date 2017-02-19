@@ -97,7 +97,6 @@
 		border-radius: 100px;
 		color : #ffffff;
 		text-align: center;
-		
 		cursor: pointer;
 		padding: 5px;
 		height: 26px;
@@ -161,25 +160,8 @@
 		border-top: 1px solid #dddddd;
 	}
 	
-	.trash {
-		display: flex;
-	    flex-direction: column;
-	    position: absolute;
-	    bottom: 0;
-	    left: 0;
-	    width: inherit;
-	    cursor: pointer;
-	    margin-bottom: 26px;
-	    overflow-y: auto;
-	}
 	.trash.expanded {
-		width: 180px;
-		background-color: #eeeeee;
-		box-sizing: border-box;
-		padding : 5px;
-		display: flex;
-		flex-direction: column;
-		height: 83vh;
+		
 	}
 
 	.trashed {
@@ -197,12 +179,15 @@
 		border: none;
 	}
 	
-	.folder-items {
+	.folder-items,.trash {
 		overflow-x: hidden;
 	    overflow-y: auto;
 	    height: 84vh;
 	    padding: 0 0 6px 0;
 	    margin-top: 11px;
+	}
+	.trash {
+		display: none;
 	}
 	.content-display {
 		position: relative;

@@ -230,16 +230,17 @@ Ext = {
             $(".trashed").toggleClass("active");
             if ( !$(".trash").hasClass("expanded") ) {
                 self.mode = "NOTES_INACTIVE";
-                $(".trash").addClass("expanded");
-                $(".delete-action, .newNoteBtn, .collapse-action").hide();
+                $(".delete-action, .newNoteBtn, .collapse-action, .folder-items").hide();
+                $(".trash").addClass("expanded").show();
+                
                 self.renderDeletedNotes();
                 $(".trash-note-preview").show();
             } else {
-                $(".trash").removeClass("expanded");
+                $(".trash").removeClass("expanded").hide();
                 self.mode = "NOTES_ACTIVE";
                 $(".trash").html("");
                 $(".trash-note-preview").hide();
-                $(".delete-action, .newNoteBtn, .collapse-action").show();
+                $(".delete-action, .newNoteBtn, .collapse-action, .folder-items").show();
                 self.renderFolders();
             }
         });
@@ -306,7 +307,7 @@ Ext = {
             $('.trash').empty();
 
             subset.forEach(function(item) {
-                var title = item.title && item.title.substr(0, 15);
+                var title = item.title && item.title.substr(0, 10);
                 $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'><span>"+title+"</span><span class='actions'><span class='restore' title='Restore'></span><span class='delete' title='Delete Forever'></span></span></div>");
             });
         }
@@ -389,7 +390,7 @@ Ext = {
             $('.trash').empty();
             var trashList = data[0].children;
             trashList.forEach(function(item){
-                title = item.title && item.title.substr(0, 15);
+                title = item.title && item.title.substr(0, 10);
                 $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'><span>"+title+"</span><span class='actions'><span class='restore' title='Restore'></span><span class='delete' title='Delete Forever'></span></span></div>"); 
             });
             cb && cb();
