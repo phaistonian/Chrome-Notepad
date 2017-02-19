@@ -252,7 +252,8 @@ Ext = {
         });
 
         $(".trash").delegate(".deleted-note-name", "click", function(event) {
-            // body...
+            $(".deleted-note-name").removeClass("active");
+            $(event.currentTarget).addClass("active");
             var noteId = $(this).attr("data-bid");
             if ( noteId ) {
                 self.loadNotebyId(noteId, true);   

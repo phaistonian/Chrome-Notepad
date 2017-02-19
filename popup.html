@@ -111,14 +111,14 @@
 		width: 100px;
 	}
 
-	.folder-name {
+	.folder-name, .deleted-note-name {
 		font-size: 14px;
 		color : #32403C;
 		margin-top: 8px;
 		padding-left: 2px;
 		cursor: pointer;
 	}
-	.folder-name.active {
+	.folder-name.active, .deleted-note-name.active {
 		color : #00AB74;
 	}
 	.folder-search {
@@ -160,12 +160,6 @@
 		padding : 0px 10px;
 		border-top: 1px solid #dddddd;
 	}
-	.folder-items {
-		overflow-x: hidden;
-		overflow-y: auto;
-	}
-
-
 	
 	.trash {
 		display: flex;
@@ -203,45 +197,6 @@
 		border: none;
 	}
 	
-	.folder-search {
-		height: 25px;
-		border: none;
-		font-size: 14px;
-		padding: 5px;
-		border-radius: 10px;
-		outline: none;
-	}
-
-	.delete-action {
-		height:16px;
-		width: 16px;
-		background: url("./icons/delete.svg");
-		cursor: pointer;
-		margin-right: 10px;
-	}
-	.search {
-		background-image: url("./icons/search.svg");
-		background-repeat: no-repeat;
-		background-position: 135px;
-	}
-
-	.right-actions {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-	.footer-strip {
-		height : 28px;
-		display: flex;
-		flex-direction: row;
-		justify-content: flex-end;
-		align-items: center;
-		color : #000000;
-		opacity: 0.3;
-		font-size : 12px;
-		padding : 0px 10px;
-		border-top: 1px solid #dddddd;
-	}
 	.folder-items {
 		overflow-x: hidden;
 	    overflow-y: auto;
