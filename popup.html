@@ -152,7 +152,7 @@
 		height : 28px;
 		display: flex;
 		flex-direction: row;
-		justify-content: flex-end;
+		justify-content: space-between;
 		align-items: center;
 		color : #000000;
 		opacity: 0.3;
@@ -161,10 +161,6 @@
 		border-top: 1px solid #dddddd;
 	}
 	
-	.trash.expanded {
-		
-	}
-
 	.trashed {
 		height: 20px;
 		cursor: pointer;
@@ -223,6 +219,14 @@
 		width: 16px;
 		background-size: contain;
 	}
+	.settings {
+		background: url("./icons/settings.svg");
+		display: inline-block;
+		height : 16px;
+		width: 16px;
+		background-size: contain;
+		cursor: pointer;
+	}
 	</style>
 </head>
 
@@ -251,6 +255,7 @@
 				<div class="trash-note-preview"></div>
 			</div>
 			<div class="footer-strip">
+				<a class="settings" title="Settings" href = "" target="_blank"></a>
 				<div>Last synchronization on : <span class="sync"></span></div>
 			</div>
 		</div>

@@ -65,15 +65,11 @@ Ext = {
                             //new subfolder: to hold deleted bookmarks
                             chrome.bookmarks.create({"title": "trashedNotes", parentId: self.bookmarkData.id}, function(data){
                                 self.trashedFolderData = data;
-                                /*self.renderDeletedNotes(function(){
-
-                                });*/
+                               
                             });
                         } else {
                             self.trashedFolderData = data;
-                            /*self.renderDeletedNotes(function(){
-
-                            });*/
+                            
                         }
                     });
 
@@ -119,6 +115,7 @@ Ext = {
         });
 
         this.bindEvents();
+        $(".settings").attr("href", "chrome-extension://"+chrome.runtime.id+"/options.html");
 	},
 
     loadConfig : function() {
