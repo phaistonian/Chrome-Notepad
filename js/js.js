@@ -98,8 +98,7 @@ Ext = {
 
 
                             self.checkIfBookmarkExists("trashedNotes", function(data) {
-                                if ( !data ) 
-                                {
+                                if ( !data ){
                                     //new subfolder: to hold deleted bookmarks
                                     chrome.bookmarks.create({"title": "trashedNotes", parentId: self.bookmarkData.id}, function(data){
                                         self.trashedFolderData = data;
@@ -228,12 +227,11 @@ Ext = {
 
         $(".trashed").click(function(){
             $(".folder-search").val("");
+            $(".trashed").toggleClass("active");
             if ( !$(".trash").hasClass("expanded") ) {
                 self.mode = "NOTES_INACTIVE";
                 $(".trash").addClass("expanded");
-                $(".delete-action").hide();
-                $(".newNoteBtn").hide();
-                $(".collapse-action").hide();
+                $(".delete-action, .newNoteBtn, .collapse-action").hide();
                 self.renderDeletedNotes();
                 $(".trash-note-preview").show();
             } else {
@@ -241,9 +239,7 @@ Ext = {
                 self.mode = "NOTES_ACTIVE";
                 $(".trash").html("");
                 $(".trash-note-preview").hide();
-                $(".delete-action").show();
-                $(".newNoteBtn").show();
-                $(".collapse-action").show();
+                $(".delete-action, .newNoteBtn, .collapse-action").show();
                 self.renderFolders();
             }
         });
@@ -255,21 +251,11 @@ Ext = {
             self.searchFolders(value);
         });
 
-        $(".trash").delegate(".deleted-note-name", "mouseenter mouseleave", function(event) {
+        $(".trash").delegate(".deleted-note-name", "click", function(event) {
             // body...
-            if( event.type === 'mouseenter' ) {
-                setTimeout(function () {
-                    $(".trash-note-preview").html("hey hello").show();
-                    var noteId = $(this).attr("data-bid");
-                    if ( noteId ) {
-                        self.loadNotebyId(noteId, true);   
-                    }
-                }.bind(this), 500);
-            } 
-            else {
-                setTimeout(function () {
-                    $('.trash-note-preview').html("");
-                }, 500);
+            var noteId = $(this).attr("data-bid");
+            if ( noteId ) {
+                self.loadNotebyId(noteId, true);   
             }
         });
 
@@ -320,7 +306,7 @@ Ext = {
 
             subset.forEach(function(item) {
                 var title = item.title && item.title.substr(0, 15);
-                $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'>"+title+"<span class='actions'><span class='restore' title='RESTORE'>R</span>&nbsp;<span class='delete' title='DELETE'>X</span></span></div>");
+                $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'><span>"+title+"</span><span class='actions'><span class='restore' title='Restore'></span><span class='delete' title='Delete Forever'></span></span></div>");
             });
         }
     },
@@ -403,10 +389,12 @@ Ext = {
             var trashList = data[0].children;
             trashList.forEach(function(item){
                 title = item.title && item.title.substr(0, 15);
-                $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'>"+title+"<span class='actions'><span class='restore' title='RESTORE'>R</span>&nbsp;<span class='delete' title='DELETE'>X</span></span></div>"); 
+                $('.trash').append("<div class = 'deleted-note-name' data-bid = '"+item.id+"'><span>"+title+"</span><span class='actions'><span class='restore' title='Restore'></span><span class='delete' title='Delete Forever'></span></span></div>"); 
             });
+            cb && cb();
         });
-        cb && cb();
+        
+        
     },
 
     newNoteInitiator: function(content) {

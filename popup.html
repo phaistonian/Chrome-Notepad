@@ -57,12 +57,11 @@
 		height: 330px;
 		resize: none;
 		overflow: auto;
-		color: #212121;
-		background-color: whitesmoke;
+
 	}
 	.folderMenu {
 		width: 180px;
-		background-color: #f0f4c3;
+		background-color: #eeeeee;
 		box-sizing: border-box;
 		padding : 5px;
 		height: 100vh;
@@ -93,13 +92,12 @@
 	#footer #sync {
 		float: right;
 	}
-
-	.newNoteBtn {
-		background-color: #4CAF50;
+	.btn {
+		background-color: #00AB74;
 		border-radius: 100px;
 		color : #ffffff;
 		text-align: center;
-		width: 100px;
+		
 		cursor: pointer;
 		padding: 5px;
 		height: 26px;
@@ -109,40 +107,66 @@
 		justify-content: center;
 		align-items: center;
 	}
+	.newNoteBtn {
+		width: 100px;
+	}
 
-	.folderMenu .folder-name {
-	    background-color: #CDDC39;
-    	color: #212121;
-	}
-	.trash .deleted-note-name {
-		color: ghostwhite;
-    	background-color: #9C27B0;
-	    display: inline-block;
-	    position: relative;
-	}
-	.trash .deleted-note-name:hover {
-		background-color: #7B1FA2;
-	}
-	.trash .restore, .trash .delete {
-		display: inline-block;
-	}
-	.trash .restore:hover {
-		color: #8BC34A;
-	}
-	.trash .delete:hover {
-		color: #F44336;
-	}
-	.actions {
-		position: absolute;
-  		right: 6px;
-	}
-	.folder-name, .deleted-note-name {
+	.folder-name {
 		font-size: 14px;
-		margin-top: 1px;
+		color : #32403C;
+		margin-top: 8px;
 		padding-left: 2px;
 		cursor: pointer;
-    	border-radius: 5px;
 	}
+	.folder-name.active {
+		color : #00AB74;
+	}
+	.folder-search {
+		height: 25px;
+		border: none;
+		font-size: 14px;
+		padding: 5px;
+		border-radius: 10px;
+		outline: none;
+	}
+
+	.delete-action {
+		height:16px;
+		width: 16px;
+		background: url("./icons/delete.svg");
+		cursor: pointer;
+		margin-right: 10px;
+	}
+	.search {
+		background-image: url("./icons/search.svg");
+		background-repeat: no-repeat;
+		background-position: 135px;
+	}
+
+	.right-actions {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	.footer-strip {
+		height : 28px;
+		display: flex;
+		flex-direction: row;
+		justify-content: flex-end;
+		align-items: center;
+		color : #000000;
+		opacity: 0.3;
+		font-size : 12px;
+		padding : 0px 10px;
+		border-top: 1px solid #dddddd;
+	}
+	.folder-items {
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+
+
+	
 	.trash {
 		display: flex;
 	    flex-direction: column;
@@ -155,31 +179,30 @@
 	    overflow-y: auto;
 	}
 	.trash.expanded {
-		background-color: #E1BEE7;
-    	height: 83vh;
-	}
-	.trashed {
+		width: 180px;
+		background-color: #eeeeee;
+		box-sizing: border-box;
+		padding : 5px;
 		display: flex;
-	    flex-direction: column;
-	    position: absolute;
-	    bottom: 0;
-	    left: 0;
-	    cursor: pointer;
-	    background-color: #4CAF50;
-	    border-radius: 5px;
-	    color: white;
-	    margin-left: 5px;
-	    margin-bottom: 6px;
-	    padding: 0 6px 0 4px;
+		flex-direction: column;
+		height: 83vh;
 	}
-	.trashed:hover, .newNoteBtn:hover {
-		box-shadow: 0 3px 10px rgba(0, 0, 0, 0.23), 0 3px 10px rgba(0, 0, 0, 0.16);
-		transform: scale(1.1);
+
+	.trashed {
+		width: 100px;
+		height: 20px;
+		cursor: pointer;
+		background-color: inherit;
+		color : black;
+		border: 0.5px solid black;
 	}
-	.folder-name.active {
-		background-color: #AFB42B;
-		color: whitesmoke;
+	.trashed.active {
+		margin-right: 5px;
+		color : #fff;
+		background-color: #00AB74;
+		border: none;
 	}
+	
 	.folder-search {
 		height: 25px;
 		border: none;
@@ -232,11 +255,30 @@
 	.trash-note-preview {
 		position: absolute;
 	    top: 0;
-	    background-color: ghostwhite;
+	    background-color: #ffffff;
 	    height: 100%;
 	    width: 100%;
 	    padding: 15px;
 	    display: none;
+	}
+	.deleted-note-name {
+		display: flex;
+    	flex-direction: row;
+    	justify-content: space-between;
+	}
+	.restore {
+		background: url("./icons/restore.svg");
+		display: inline-block;
+		height : 16px;
+		width: 16px;
+		background-size: contain;
+	}
+	.delete {
+		background: url("./icons/delete_forever.svg");
+		display: inline-block;
+		height : 16px;
+		width: 16px;
+		background-size: contain;
 	}
 	</style>
 </head>
@@ -248,7 +290,9 @@
 			<input disabled = "disabled" type="text" class = "folder-search search" placeholder="Search Notes.."/>
 			<div class="folder-items"></div>
 			<div class="trash"></div>
-			<div class="trashed">BIN</div>
+			<div class="btn trashed">
+				<div>Recycle</div>
+			</div>
 		</div>
 		<div class="rpanel">
 			<div class="header-strip">
@@ -256,7 +300,7 @@
 
 				<div class = "right-actions">
 					<div class="delete-action"></div>
-					<div class = "newNoteBtn">New Note</div>
+					<div class = "btn newNoteBtn">New Note</div>
 				</div>
 			</div>
 			<div class="content-display">
