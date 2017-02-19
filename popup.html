@@ -155,7 +155,6 @@
 		justify-content: space-between;
 		align-items: center;
 		color : #000000;
-		opacity: 0.3;
 		font-size : 12px;
 		padding : 0px 10px;
 		border-top: 1px solid #dddddd;
@@ -168,6 +167,8 @@
 		color : black;
 		border: 0.5px solid black;
     	bottom: 5px;
+    	position: absolute;
+    	width: 110px; 
 	}
 	.trashed.active {
 		margin-right: 5px;
@@ -256,7 +257,7 @@
 			</div>
 			<div class="footer-strip">
 				<a class="settings" title="Settings" href = "" target="_blank"></a>
-				<div>Last synchronization on : <span class="sync"></span></div>
+				<div style="opacity: 0.3;">Last synchronization on : <span class="sync"></span></div>
 			</div>
 		</div>
 	</div>
