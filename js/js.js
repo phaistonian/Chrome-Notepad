@@ -153,6 +153,10 @@ Ext = {
             _gaq.push(['_trackEvent', "NoteDeletetedForever", 'clicked', "NoteDeletetedForever"]);
         } else if ( eventType == "NOTE_RESTORATION" ) {
             _gaq.push(['_trackEvent', "NoteRestored", 'clicked', "NoteRestored"]);
+        } else if ( eventType == "NOTE_BIN_VISITED" ) {
+            _gaq.push(['_trackEvent', "NoteBinVisited", 'clicked', "NoteBinVisited"]);
+        } else if ( eventType == "NOTE_FULL_MODE" ) {
+            _gaq.push(['_trackEvent', "NoteFullMode", 'clicked', "NoteFullMode"]);
         }
     },
 
@@ -186,6 +190,7 @@ Ext = {
                 $(".rpanel").animate({width : "620px"});
                 self.collapsed = false;
             } else {
+                self.trackGoogleEvent("NOTE_FULL_MODE");
                 $this.removeClass("collapse-arrow").addClass("expand-arrow");
                 $(".rpanel").animate({width : "100%"});
                 self.collapsed = true;
@@ -243,6 +248,7 @@ Ext = {
             $(".folder-search").val("");
             $(".trashed").toggleClass("active");
             if ( !$(".trash").hasClass("expanded") ) {
+                self.trackGoogleEvent("NOTE_BIN_VISITED");
                 self.mode = "NOTES_INACTIVE";
                 $(".delete-action, .newNoteBtn, .collapse-action, .folder-items").hide();
                 $(".trash").addClass("expanded").show();
