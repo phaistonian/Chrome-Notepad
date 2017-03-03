@@ -30,7 +30,7 @@ Ext = {
         }
 
 
-		this.$textArea.val(this.data && decodeURIComponent(this.data.content) || "").focus();
+		this.$textArea.val(this.data && decodeURIComponent(encodeURIComponent(this.data.content)) || "").focus();
 
         this.checkIfBookmarkExists("CuteNotepad",function(data) {
 
@@ -423,7 +423,7 @@ Ext = {
 
     newNoteInitiator: function(content) {
         var self = this;
-        $("textarea").val(decodeURIComponent(content)).focus();
+        $("textarea").val(decodeURIComponent(encodeURIComponent(content))).focus();
 
         this.createNote(content, function(note) {
             self.selectedNoteId = note.id;
@@ -439,7 +439,7 @@ Ext = {
     },
 
     removeLineBreaks : function(inStr) {
-        return decodeURIComponent(inStr.replace(/<br \/>/g, "\n"));
+        return decodeURIComponent(encodeURIComponent(inStr.replace(/<br \/>/g, "\n")));
     },
 
     addLineBreaks : function(inStr) {
