@@ -30,7 +30,7 @@ Ext = {
         }
 
 
-		this.$textArea.val(this.data && decodeURIComponent(encodeURIComponent(this.data.content)) || "").focus();
+		this.$textArea.val(this.data && decodeURIComponent(this.encodeURIComponent(this.data.content)) || "").focus();
 
         this.checkIfBookmarkExists("CuteNotepad",function(data) {
 
@@ -423,7 +423,7 @@ Ext = {
 
     newNoteInitiator: function(content) {
         var self = this;
-        $("textarea").val(decodeURIComponent(encodeURIComponent(content))).focus();
+        $("textarea").val(decodeURIComponent(this.encodeURIComponent(content))).focus();
 
         this.createNote(content, function(note) {
             self.selectedNoteId = note.id;
@@ -437,9 +437,14 @@ Ext = {
             });
         });
     },
-
+    encodePercentSymbol : function(str) {
+        return str.replace(/%/g, "%25");
+    },
+    encodeURIComponent : function(str) {
+        return str;
+    },
     removeLineBreaks : function(inStr) {
-        return decodeURIComponent(encodeURIComponent(inStr.replace(/<br \/>/g, "\n")));
+        return decodeURIComponent(this.encodeURIComponent(inStr.replace(/<br \/>/g, "\n")));
     },
 
     addLineBreaks : function(inStr) {
@@ -453,7 +458,7 @@ Ext = {
         this.saveTimer = setTimeout(function() {
 
             if(content !== undefined && content !== self.data['content']) {
-                self.data['content'] 	= content;
+                self.data['content'] 	= self.encodePercentSymbol(content);
                 self.data.updated 		= new Date().getTime();
                 self.data.selectedNoteId  = self.selectedNoteId;
                 self.data.collapsed = self.collapsed;
@@ -465,7 +470,7 @@ Ext = {
 
             chrome.bookmarks.update(self.selectedNoteId, {
                 title : content.substr(0, 15) || "New Note",
-                url   : "data:text/plain;charset=UTF-8," + self.addLineBreaks(content)
+                url   : "data:text/plain;charset=UTF-8," + self.encodePercentSymbol(self.addLineBreaks(content))
             }, function() {
                 self.renderFolders(function (bookmarksTree) {
                     self.searchFolders($(".folder-search").val());
