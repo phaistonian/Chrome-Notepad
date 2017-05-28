@@ -7,7 +7,6 @@ Options = {
     },
 
     initialize	: function() {
-        var sync = document.getElementById('sync');
         if(!this.data.options) {
             this.data.options = {
                 'sync' : true
@@ -35,10 +34,7 @@ Options = {
         }
 
 
-        if(this.data.options.sync) {
-            sync.checked = true;
-        }
-
+        
 
         var btn = document.getElementById("saveBtn");
         btn.addEventListener("click", function() {
@@ -48,14 +44,13 @@ Options = {
     },
 
     save : function() {
-        var sync 	= document.getElementById('sync');
+    
         var fontSize 	= document.getElementById('font-size');
         var fontFamily = document.getElementById('font-family');
         var size = document.getElementById('size');
 
         // Store
         //this.data 				= localStorage['data'] ? JSON.parse(localStorage['data']) : this.data;
-        this.data.options.sync			= !!sync.checked;
         this.data.options.fontSize 		= fontSize.value;
         this.data.options.fontFamily    = fontFamily.value;
         this.data.options.size 	        = size.value || 300;
