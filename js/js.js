@@ -157,6 +157,8 @@ Ext = {
             _gaq.push(['_trackEvent', "NoteBinVisited", 'clicked', "NoteBinVisited"]);
         } else if (eventType == "NOTE_FULL_MODE") {
             _gaq.push(['_trackEvent', "NoteFullMode", 'clicked', "NoteFullMode"]);
+        } else if(eventType == "NOTE_REORDERED") {
+            _gaq.push(['_trackEvent', "NoteReordered", 'clicked', "NoteReordered"]);
         }
     },
 
@@ -323,7 +325,7 @@ Ext = {
                 displayOrder: iter
             }
         });
-
+        self.trackGoogleEvent("NOTE_REORDERED");
         localStorage['orderMap'] = JSON.stringify(orderMap);
     },
 
