@@ -11,7 +11,6 @@ Ext = {
         var content;
 
         if (this.initialized === true) return;
-
         this.initialized = true;
         this.mode = "NOTES_ACTIVE";
         this.activeNotes_searchStr = "";
@@ -33,7 +32,6 @@ Ext = {
         this.$textArea.val(this.data && decodeURIComponent(this.encodeURIComponent(this.data.content)) || "").focus();
 
         this.checkIfBookmarkExists("CuteNotepad", function (data) {
-
             //This means bookmark is found for this extension
             if (data) {
 
@@ -54,7 +52,10 @@ Ext = {
                         if ($(".folder-name[data-bid='" + self.selectedNoteId + "']").length) {
                             $(".folder-name[data-bid='" + self.selectedNoteId + "']").trigger("click");
                         } else {
-                            self.selectedNoteId = cuteNotepadChildren[0].id;
+                            var _tempChild = cuteNotepadChildren.filter(function(item) {
+                                return !item.children;
+                            });
+                            self.selectedNoteId = _tempChild[0].id;
                             $(".folder-name[data-bid='" + self.selectedNoteId + "']").trigger("click");
                         }
 
@@ -489,7 +490,6 @@ Ext = {
     },
     //Saves data to Bookmarks
     save: function (content) {
-
         var self = this;
         clearTimeout(this.saveTimer);
         this.saveTimer = setTimeout(function () {
@@ -516,7 +516,7 @@ Ext = {
             });
 
 
-        }, 250);
+        }, 500);
 
     },
     upsertSelectedNote: function () {
