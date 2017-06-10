@@ -516,7 +516,7 @@ Ext = {
             });
 
 
-        }, 500);
+        }, 250);
 
     },
     upsertSelectedNote: function () {
