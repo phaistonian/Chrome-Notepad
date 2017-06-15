@@ -482,7 +482,6 @@ View.prototype.bindEvents = function() {
             containment: "parent",
             update: function (event, ui) {
                 var ele = $(ui);
-                debugger;
                 self.updateDisplayOrder();
             }
         });
