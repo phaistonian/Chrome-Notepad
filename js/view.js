@@ -163,11 +163,15 @@ View.prototype.renderFolders = function(cb) {
             self.$el.find('.folder-items').empty();
             
             var sortedChildren = bookmarkTreeNodes[0].children.sort(function (a, b) {
-                if (self.orderMap[a.id] && self.orderMap[b.id]) {
-                    return self.orderMap[a.id].displayOrder - self.orderMap[b.id].displayOrder;
-                } else {
-                    return 1;
+                //Means no children - if children then it means it is a trash notes folder
+                if(!(a.children || b.children)) {
+                    if (self.orderMap[a.id] && self.orderMap[b.id]) {
+                        return self.orderMap[a.id].displayOrder - self.orderMap[b.id].displayOrder;
+                    } else {
+                        return 1;
+                    }
                 }
+                
             });
             
             sortedChildren.forEach(function (item) {
@@ -238,7 +242,7 @@ View.prototype.searchFolders = function(value) {
         });
     } else {
         self.inactiveNotes_searchStr = value;
-        if ( valuetrim() == "" ) {
+        if ( value.trim() == "" ) {
             subset = this.inactiveNotes;
         } else {
             subset = this.inactiveNotes.filter(function (item) {
@@ -307,7 +311,7 @@ View.prototype.upsertSelectedNote = function () {
 };
 View.prototype.upsertCollapse = function () {
     try {
-        this.mode.data.collapsed = this.model.collapsed;
+        this.model.data.collapsed = this.model.collapsed;
     }
     catch (e) {
         console.info("Error " + e.message);
