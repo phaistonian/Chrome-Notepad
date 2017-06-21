@@ -79,6 +79,7 @@ Ext = {
             } else {
 
                 //No bookmark found, hence create one
+                self.trackGoogleEvent("INSTALLED");
                 chrome.bookmarks.create({ "title": "CuteNotepad" }, function (newFolder) {
 
                     content = self.data && self.data.content || "";
@@ -116,7 +117,10 @@ Ext = {
         });
 
         this.bindEvents();
-        $(".settings").attr("href", "chrome-extension://" + chrome.runtime.id + "/options.html");
+        $(".settings").attr("href", "chrome-extension://" + chrome.runtime.id + "/options.html")
+            .click(function(){
+                self.trackGoogleEvent("SETTINGS_CLICKED");
+            });
     },
 
     loadConfig: function () {
@@ -160,6 +164,10 @@ Ext = {
             _gaq.push(['_trackEvent', "NoteFullMode", 'clicked', "NoteFullMode"]);
         } else if(eventType == "NOTE_REORDERED") {
             _gaq.push(['_trackEvent', "NoteReordered", 'clicked', "NoteReordered"]);
+        }else if(eventType == "INSTALLED") {
+            _gaq.push(['_trackEvent', "Installed", 'clicked', "Installed"]);
+        }else if(eventType == "SETTINGS_CLICKED") {
+            _gaq.push(['_trackEvent', "Settings", 'clicked', "Settings"]);
         }
     },
 
