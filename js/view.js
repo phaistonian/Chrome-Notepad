@@ -8,6 +8,7 @@ var View = function() {
     this.inactiveNotes_searchStr = "";
     this.activeNotes = [];
     this.inactiveNotes = [];
+    this.actionsView = new Actions();
     this.orderMap = localStorage['orderMap'] 
         && (typeof localStorage['orderMap'] === "string")
             && JSON.parse(localStorage['orderMap']) || {};
@@ -485,6 +486,14 @@ View.prototype.bindEvents = function() {
                 self.updateDisplayOrder();
             }
         });
+
+        //Actions dropdown
+
+        this.$el.find(".actionsBtn").click(function() {
+            self.actionsView.show();
+        });
+
+
 };
 document.addEventListener('DOMContentLoaded', function () {
     if (location.href.indexOf('popup.html') !== -1) {
@@ -496,29 +505,3 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 500)
     }
 }, false);
-// document.addEventListener('DOMContentLoaded', function () {
-//     $("textarea").focus();
-//     setTimeout(function () {
-//         $(".folder-search").removeAttr("disabled")
-//     }, 500)
-// }, false);
-
-
-// if (location.href.indexOf('popup.html') !== -1) {
-//     Ext.initialize();
-// }
-
-
-// var template = '<div class="folderMenu">'+
-// '<input disabled = "disabled" type="text" class = "folder-search search" placeholder="Search Notes.."/>'+
-// '<div class="folder-items"></div>'+
-// 			'<div class="trash"></div><div class="btn trashed"><div>Recycle Bin</div></div></div>'+
-// 		'<div class="rpanel"><div class="header-strip"><div class = "collapse-action collapse-arrow"></div>'+
-//             '<div class = "right-actions"><div class="delete-action"></div><div class = "btn newNoteBtn">New Note</div></div></div>'+
-			
-// 			'<div class="content-display"><textarea autofocus = "true" id = "notepad" placeholder="Write something here !!" wrap="hard"></textarea>'+
-// 				'<div class="trash-note-preview"></div></div>'+
-// 			'<div class="footer-strip"><a class="settings" title="Settings" href = "" target="_blank"></a>'+
-// 				'<div style="opacity: 0.3;">Last synchronization on : <span class="sync"></span></div></div>'+
-			
-// 		'</div>';
