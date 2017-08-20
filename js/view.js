@@ -216,6 +216,8 @@ View.prototype.renderFolders = function(cb) {
                     self.inactiveNotes = item.children;
                 }
             });
+            var $nos = $("<span>").attr({class:"activeNos"}).html(self.activeNotes.length);
+            self.$el.find(".trashed").append($nos);
             self.hightlightSelected();
             self.$textArea.focus();
             cb && cb(bookmarkTreeNodes[0].children);
@@ -455,6 +457,19 @@ View.prototype.bindEvents = function() {
             if (!self.$el.find(".trash").hasClass("expanded")) {
                 Utils.trackGoogleEvent("NOTE_BIN_VISITED");
                 self.mode = "NOTES_INACTIVE";
+                var $backArrow = $("<span>").attr({"class" : "backArrow"})
+                    .css({
+                        "background-image"  : "url('"+"./icons/back-arrow.svg"+"')",
+                        "background-repeat" : "no-repeat",
+                        "width": "15px",
+                        "height": "13px",
+                        "margin-top"  : "-2px"
+                    });
+                var $backText = $("<span>").attr({"class": "backText"})
+                    .css({
+                        "margin-left" : "10px"
+                    }).html("Back to Notes");
+                self.$el.find(".trashed").html("").append($backArrow).append($backText);
                 self.$el.find(".delete-action, .newNoteBtn, .collapse-action, .folder-items, .actionsBtn").hide();
                 self._shareView.hide();
                 self.$el.find(".trash").addClass("expanded").show();
@@ -463,6 +478,8 @@ View.prototype.bindEvents = function() {
                 self.$el.find(".trash-note-preview").show();
             } else {
                 self.$el.find(".trash").removeClass("expanded").hide();
+                var $text = $("<span>").attr({class:"activeModeText"}).html("Recycle bin Notes");
+                self.$el.find(".trashed").html($text);
                 self.mode = "NOTES_ACTIVE";
                 self.$el.find(".trash").html("");
                 self.$el.find(".trash-note-preview").hide();
