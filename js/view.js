@@ -22,6 +22,23 @@ View.prototype.initialize = function() {
     this.$textArea = this.$el.find("#notepad");
     
     this.model = new Model();
+    this._shareView = Object.create(ShareView);
+    this._shareView.init(20, 22);
+    this.shareFormTemplate = '' +
+        '<div id="dialog-form" title="Share Note">' +
+          '<div class="content">' +
+            '<div class="formContent">' +
+              '<label for="name">URL</label>' +
+              '<input type="text" name="url" id="url" value="" class="text">' +
+              '<div class="cpy">Copy</div>' +
+            '</div>' +
+            '<div class="footer">' +
+              '<p class="note">If you want to stop the user to see the url, click on the below link</p>' +
+              '<div class="stop">Stop Sharing</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
     
     var self = this;
     this.model.loadConfig(function(item) {
@@ -77,7 +94,9 @@ View.prototype.initialize = function() {
                     }
 
                     self.$textArea.focus();
+                    self.renderShareView();
                 }
+
                 self.checkIfBookmarkExists("trashedNotes", function (data) {
                     if (!data) {
                         //new subfolder: to hold deleted bookmarks
@@ -101,6 +120,7 @@ View.prototype.initialize = function() {
                     self.renderFolders(function (bookmarksTree) {
                         if (bookmarksTree && bookmarksTree[0]) {
                             self.model.selectedNoteId = note.id;
+                            self.renderShareView();
                         }
                         self.$el.find(".folder-name").eq(0).addClass("active");
                         self.$textArea.focus();
@@ -124,6 +144,16 @@ View.prototype.initialize = function() {
     });
     self.bindEvents();
     self.$el.find(".settings").attr("href", "chrome-extension://" + chrome.runtime.id + "/options.html");
+};
+View.prototype.renderShareView = function renderShareView () {
+    if ( this.mode == "NOTES_ACTIVE" ) {
+        this._shareView.render(this.$el.find(".right-actions"), this.model.selectedNoteId);
+        this.$el.find(".shareBtn").click(this.invokeShareDialog.bind(this));
+    }
+};
+View.prototype.invokeShareDialog = function invokeShareDialog () {
+    if ( !this.$el.find(".dialog-form")[0] ) this.$el.append(this.shareFormTemplate);
+    this._shareView.showDilaog(this.$el.find("#dialog-form"), this.$el.find(".container"));
 };
 View.prototype.save = function (content) {
     var self = this;
@@ -152,7 +182,7 @@ View.prototype.save = function (content) {
             });
         });
     }, 250);
-}
+};
 View.prototype.renderFolders = function(cb) {
         var self = this;
         var title = "";
@@ -204,6 +234,7 @@ View.prototype.newNoteInitiator = function (content) {
                 if (this.$el.find(".folder-name").length == 1) {
                     self.save(self.$textArea.val());
                 }
+                this.renderShareView();
             });
         });
 };
@@ -217,7 +248,7 @@ View.prototype.createNote = function (content, cb) {
         self.model.selectedNoteId = note.id;
         cb && cb(note);
     });
-}
+};
 View.prototype.hightlightSelected = function () {
         this.$el.find(".folder-name").removeClass("active");
         this.$el.find(".folder-name[data-bid='" + this.model.selectedNoteId + "']").addClass("active");
@@ -274,7 +305,7 @@ View.prototype.updateDisplayOrder = function() {
     });
     Utils.trackGoogleEvent("NOTE_REORDERED");
     localStorage['orderMap'] = JSON.stringify(this.orderMap);
-}
+};
 View.prototype.loadNotebyId = function (bookmarkId, preview) {
     var self = this;
     if (preview) {
@@ -375,6 +406,7 @@ View.prototype.bindEvents = function() {
             $(".folder-name").removeClass("active");
             $this.addClass("active");
             self.model.selectedNoteId = $this.attr("data-bid");
+            self._shareView.setSelectedNote(self.model.selectedNoteId);
             self.loadNotebyId($this.attr("data-bid"), false);
             self.upsertSelectedNote();
         });
@@ -424,6 +456,7 @@ View.prototype.bindEvents = function() {
                 Utils.trackGoogleEvent("NOTE_BIN_VISITED");
                 self.mode = "NOTES_INACTIVE";
                 self.$el.find(".delete-action, .newNoteBtn, .collapse-action, .folder-items, .actionsBtn").hide();
+                self._shareView.hide();
                 self.$el.find(".trash").addClass("expanded").show();
 
                 self.renderDeletedNotes();
@@ -434,6 +467,7 @@ View.prototype.bindEvents = function() {
                 self.$el.find(".trash").html("");
                 self.$el.find(".trash-note-preview").hide();
                 self.$el.find(".delete-action, .newNoteBtn, .collapse-action, .folder-items, .actionsBtn").show();
+                self._shareView.show();
                 self.renderFolders();
             }
         });
