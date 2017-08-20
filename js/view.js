@@ -217,7 +217,7 @@ View.prototype.renderFolders = function(cb) {
                 }
             });
             var $text = $("<span>").attr({class:"activeModeText"}).html("Recycle bin Notes");
-            var $nos = $("<span>").attr({class:"activeNos"}).html(self.activeNotes.length);
+            var $nos = $("<span>").attr({class:"activeNos"}).html(self.inactiveNotes.length);
             self.$el.find(".trashed").html("").append($text).append($nos);
             self.hightlightSelected();
             self.$textArea.focus();
@@ -479,8 +479,6 @@ View.prototype.bindEvents = function() {
                 self.$el.find(".trash-note-preview").show();
             } else {
                 self.$el.find(".trash").removeClass("expanded").hide();
-                var $text = $("<span>").attr({class:"activeModeText"}).html("Recycle bin Notes");
-                self.$el.find(".trashed").html($text);
                 self.mode = "NOTES_ACTIVE";
                 self.$el.find(".trash").html("");
                 self.$el.find(".trash-note-preview").hide();
