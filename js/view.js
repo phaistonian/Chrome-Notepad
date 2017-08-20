@@ -423,7 +423,7 @@ View.prototype.bindEvents = function() {
             if (!self.$el.find(".trash").hasClass("expanded")) {
                 Utils.trackGoogleEvent("NOTE_BIN_VISITED");
                 self.mode = "NOTES_INACTIVE";
-                self.$el.find(".delete-action, .newNoteBtn, .collapse-action, .folder-items").hide();
+                self.$el.find(".delete-action, .newNoteBtn, .collapse-action, .folder-items, .actionsBtn").hide();
                 self.$el.find(".trash").addClass("expanded").show();
 
                 self.renderDeletedNotes();
@@ -433,7 +433,7 @@ View.prototype.bindEvents = function() {
                 self.mode = "NOTES_ACTIVE";
                 self.$el.find(".trash").html("");
                 self.$el.find(".trash-note-preview").hide();
-                self.$el.find(".delete-action, .newNoteBtn, .collapse-action, .folder-items").show();
+                self.$el.find(".delete-action, .newNoteBtn, .collapse-action, .folder-items, .actionsBtn").show();
                 self.renderFolders();
             }
         });
