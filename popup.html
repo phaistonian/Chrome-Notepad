@@ -167,13 +167,9 @@
 		
 		.footer-strip {
 			height: 28px;
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: center;
 			color: #000000;
 			font-size: 12px;
-			padding: 0 10px;
+			padding: 6px 0;
 			border-top: 1px solid #dddddd;
 		}
 		
@@ -254,13 +250,32 @@
 			background-size: contain;
 		}
 		
-		.settings {
+		.footer-strip .settings {
 			background: url("./icons/settings.svg");
-			display: inline-block;
 			height: 16px;
 			width: 16px;
 			background-size: contain;
 			cursor: pointer;
+			position: absolute;
+			left: 10px;
+		}
+
+		.footer-strip .feedback_fb_page {
+			height: 16px;
+			width: 16px;
+			background: url("./icons/fb-icon.svg") no-repeat;
+			display: inline-block;
+			cursor: pointer;
+			background-size: contain;
+			left: 30px;
+			position: absolute;
+		}
+		.footer-strip .syncInfo {
+			opacity: 0.3;
+			display: inline-block;
+			vertical-align: 3px;
+			position: absolute;
+			right: 10px;
 		}
 		/**======================
 		Action Menu Styles
@@ -362,7 +377,8 @@
 			</div>
 			<div class="footer-strip">
 				<a class="settings" title="Settings" href="" target="_blank"></a>
-				<div style="opacity: 0.3;">Last synchronization on : <span class="sync"></span></div>
+				<a class="feedback_fb_page" title="Give us your feedback on our facebook page" target="_blank" href="https://www.facebook.com/ChromeNotepad/"></a>
+				<div class="syncInfo">Last synchronization on : <span class="sync"></span></div>
 			</div>
 		</div>
 		<div class="action-menu">
