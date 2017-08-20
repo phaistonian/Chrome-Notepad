@@ -216,8 +216,9 @@ View.prototype.renderFolders = function(cb) {
                     self.inactiveNotes = item.children;
                 }
             });
+            var $text = $("<span>").attr({class:"activeModeText"}).html("Recycle bin Notes");
             var $nos = $("<span>").attr({class:"activeNos"}).html(self.activeNotes.length);
-            self.$el.find(".trashed").append($nos);
+            self.$el.find(".trashed").html("").append($text).append($nos);
             self.hightlightSelected();
             self.$textArea.focus();
             cb && cb(bookmarkTreeNodes[0].children);
