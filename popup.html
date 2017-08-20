@@ -267,8 +267,15 @@
 			display: inline-block;
 			cursor: pointer;
 			background-size: contain;
-			left: 30px;
+			left: 35px;
 			position: absolute;
+			filter: gray; /* IE6-9 */
+			-webkit-filter: grayscale(1); /* Google Chrome, Safari 6+ & Opera 15+ */
+			filter: grayscale(1);
+		}
+		.footer-strip .feedback_fb_page:hover {
+			-webkit-filter: grayscale(0);
+			filter: none;
 		}
 		.footer-strip .syncInfo {
 			opacity: 0.3;
