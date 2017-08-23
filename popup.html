@@ -1,233 +1,366 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>Chrome Notepad</title>
 	<style type="text/css" media="all">
-
-	* {
-		margin: 0px;
-		padding: 0px;
-		box-sizing: border-box;
-	}
-
-	.header-strip {
-		height : 50px;
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		justify-content: space-between;
-		padding: 0px 10px;
-		border-bottom: 1px solid #ddd;
-	}
-	body {
-		padding: 0px;
-		margin: 0px;
-		width: 800px;
+		* {
+			margin: 0px;
+			padding: 0px;
+			box-sizing: border-box;
+		}
 		
-	}
-	.container {
-		width:  100%;
-		font-size: 13px;
-		font-weight: normal;
-		font-family: "Droid Sans Mono Slashed", "Consolas", "Monaco", "Courier New", serif;
-		resize: both;
-		display: flex;
-		flex-direction: row;
-		min-height: 400px;
-		height : auto;
-	}
-	.rpanel {
-		box-sizing: border-box;
-		width: 620px;
-		position: absolute;
-		right : 0px;
-		background: #ffffff;
-		display: flex;
-		flex-direction: column;
-		height : 100vh;
-	}
-	textarea {
-		width : 100%;
-		max-width : 100%;
-		outline: none;
-		border: none;
-		box-sizing: border-box;
-		padding: 15px;
-		font-size: 14px;
-		height: 100%;
-		resize: none;
-		overflow: auto;
+		.header-strip {
+			height: 50px;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0px 10px;
+			border-bottom: 1px solid #ddd;
+		}
+		
+		body {
+			padding: 0px;
+			margin: 0px;
+			width: 800px;
+		}
+		
+		.container {
+			width: 100%;
+			font-size: 13px;
+			font-weight: normal;
+			font-family: "Droid Sans Mono Slashed", "Consolas", "Monaco", "Courier New", serif;
+			resize: both;
+			display: flex;
+			flex-direction: row;
+			min-height: 400px;
+			height: auto;
+		}
+		
+		.rpanel {
+			box-sizing: border-box;
+			width: 620px;
+			position: absolute;
+			right: 0px;
+			background: #ffffff;
+			display: flex;
+			flex-direction: column;
+			height: 100vh;
+		}
+		
+		textarea {
+			width: 100%;
+			max-width: 100%;
+			outline: none;
+			border: none;
+			box-sizing: border-box;
+			padding: 15px;
+			font-size: 14px;
+			height: 100%;
+			resize: none;
+			overflow: auto;
+		}
+		
+		.folderMenu {
+			width: 180px;
+			background-color: #eeeeee;
+			box-sizing: border-box;
+			height: 100vh;
+			display: flex;
+			flex-direction: column;
+		}
+		
+		.expand-arrow {
+			height: 16px;
+			width: 16px;
+			background: url("./icons/expand-arrow.svg");
+		}
+		
+		.collapse-arrow {
+			height: 16px;
+			width: 16px;
+			background: url("./icons/collapse-arrow.svg");
+		}
+		
+		.collapse-action {
+			cursor: pointer;
+		}
+		
+		#footer {
+			font: normal 12px arial, serif;
+			margin: 0;
+			color: #999;
+		}
+		
+		#footer #updated {
+			float: left;
+		}
+		
+		#footer #sync {
+			float: right;
+		}
+		
+		.btn {
+			background-color: #00AB74;
+			border-radius: 100px;
+			color: #ffffff;
+			text-align: center;
+			cursor: pointer;
+			padding: 5px;
+			height: 26px;
+			font-face: Avenir-Book;
+			font-size: 14px;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		
+		.newNoteBtn {
+			width: 100px;
+		}
+		
+		.folder-name,
+		.deleted-note-name {
+			font-size: 14px;
+			color: #32403C;
+			margin-top: 8px;
+			padding-left: 2px;
+			cursor: pointer;
+		}
+		
+		.folder-name.active,
+		.deleted-note-name.active {
+			color: #00AB74;
+		}
+		
+		.folder-search {
+			height: 26px;
+			border: none;
+			font-size: 14px;
+			padding: 5px 9px;
+			border-radius: 48px;
+			outline: none;
+			margin: 7px 5px 5px;
+		}
+		
+		.delete-action {
+			height: 16px;
+			width: 16px;
+			background: url("./icons/delete.svg");
+			cursor: pointer;
+			margin-right: 10px;
+		}
+		
+		.search {
+			background-image: url("./icons/search.svg");
+			background-repeat: no-repeat;
+			background-position: 135px;
+		}
+		
+		.right-actions {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		
+		.footer-strip {
+			height: 28px;
+			color: #000000;
+			font-size: 12px;
+			padding: 6px 0;
+			border-top: 1px solid rgba(151, 151, 151, 0.1);
+		}
+		
+		.trashed {
+			font-family: Avenir-Light;
+			cursor: pointer;
+			font-size: 12px;
+			color: #00AB74;
+			padding: 5px 10px;
+			border-top: 1px solid rgba(151, 151, 151, 0.2);
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			height: 28px;
+		}
 
-	}
-	.folderMenu {
-		width: 180px;
-		background-color: #eeeeee;
-		box-sizing: border-box;
-		padding : 5px;
-		height: 100vh;
-		display: flex;
-		flex-direction: column;
-	}
-	.expand-arrow {
-		height : 16px;
-		width: 16px;
-		background: url("./icons/expand-arrow.svg");
-	}
-	.collapse-arrow {
-		height : 16px;
-		width: 16px;
-		background: url("./icons/collapse-arrow.svg");
-	}
-	.collapse-action {
-		cursor: pointer;
-	}
-	#footer {
-		font: normal 12px arial, serif;
-		margin: 0;
-		color: #999;
-	}
-	#footer #updated {
-		float: left;
-	}
-	#footer #sync {
-		float: right;
-	}
-	.btn {
-		background-color: #00AB74;
-		border-radius: 100px;
-		color : #ffffff;
-		text-align: center;
-		cursor: pointer;
-		padding: 5px;
-		height: 26px;
-		font-face : Avenir-Book;
-		font-size: 14px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-	.newNoteBtn {
-		width: 100px;
-	}
+		.trashed .activeNos {
+			background: #FFFFFF;
+			border: 1px solid #C1C1C1;
+			border-radius: 16px;
+			min-width: 21px;
+			height: 16px;
+			margin-left: 5px;
+			font-size: 11px;
+			color: #000000;
+			display: inline-block;
+			vertical-align: top;
+			text-align: center;
+		}
+		
+		.trashed.active .backArrow{
+			width: 15px;
+			height: 13px;
+		}
+		
+		.folder-items,
+		.trash {
+			overflow-x: hidden;
+			overflow-y: auto;
+			height: 84vh;
+			padding: 3px 5px 6px 12px;
+			flex-grow: 1;
+			width: 100%;
+		}
+		
+		.trash {
+			display: none;
+		}
+		
+		.content-display {
+			position: relative;
+			flex: 1;
+			display: flex;
+		}
+		
+		.trash-note-preview {
+			position: absolute;
+			top: 0;
+			background-color: #ffffff;
+			height: 100%;
+			width: 100%;
+			padding: 15px;
+			display: none;
+		}
+		
+		.deleted-note-name {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+		}
+		
+		.restore {
+			background: url("./icons/restore.svg") no-repeat;
+			display: inline-block;
+			height: 13px;
+			width: 16px;
+			background-size: contain;
+			vertical-align: text-top;
+		}
+		
+		.delete {
+			background: url("./icons/delete.svg") no-repeat;
+			display: inline-block;
+			height: 13px;
+			width: 16px;
+			background-size: contain;
+			vertical-align: text-top;
+		}
+		
+		.footer-strip .settings {
+			background: url("./icons/settings.svg") no-repeat;
+			height: 16px;
+			width: 16px;
+			background-size: contain;
+			cursor: pointer;
+			position: absolute;
+			left: 10px;
+		}
 
-	.folder-name, .deleted-note-name {
-		font-size: 14px;
-		color : #32403C;
-		margin-top: 8px;
-		padding-left: 2px;
-		cursor: pointer;
-	}
-	.folder-name.active, .deleted-note-name.active {
-		color : #00AB74;
-	}
-	.folder-search {
-		height: 25px;
-		border: none;
-		font-size: 14px;
-		padding: 5px;
-		border-radius: 10px;
-		outline: none;
-	}
-
-	.delete-action {
-		height:16px;
-		width: 16px;
-		background: url("./icons/delete.svg");
-		cursor: pointer;
-		margin-right: 10px;
-	}
-	.search {
-		background-image: url("./icons/search.svg");
-		background-repeat: no-repeat;
-		background-position: 135px;
-	}
-
-	.right-actions {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-	.footer-strip {
-		height : 28px;
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
-		align-items: center;
-		color : #000000;
-		font-size : 12px;
-		padding : 0px 10px;
-		border-top: 1px solid #dddddd;
-	}
-	
-	.trashed {
-		height: 20px;
-		cursor: pointer;
-		background-color: inherit;
-		color : black;
-		border: 0.5px solid black;
-    	bottom: 5px;
-    	position: absolute;
-    	width: 110px; 
-	}
-	.trashed.active {
-		margin-right: 5px;
-		color : #fff;
-		background-color: #00AB74;
-		border: none;
-	}
-	
-	.folder-items,.trash {
-		overflow-x: hidden;
-	    overflow-y: auto;
-	    height: 84vh;
-	    padding: 0 0 6px 0;
-	    margin-top: 11px;
-	}
-	.trash {
-		display: none;
-	}
-	.content-display {
-		position: relative;
-		flex: 1;
-		display: flex;
-	}
-	.trash-note-preview {
-		position: absolute;
-	    top: 0;
-	    background-color: #ffffff;
-	    height: 100%;
-	    width: 100%;
-	    padding: 15px;
-	    display: none;
-	}
-	.deleted-note-name {
-		display: flex;
-    	flex-direction: row;
-    	justify-content: space-between;
-	}
-	.restore {
-		background: url("./icons/restore.svg");
-		display: inline-block;
-		height : 16px;
-		width: 16px;
-		background-size: contain;
-	}
-	.delete {
-		background: url("./icons/delete_forever.svg");
-		display: inline-block;
-		height : 16px;
-		width: 16px;
-		background-size: contain;
-	}
-	.settings {
-		background: url("./icons/settings.svg");
-		display: inline-block;
-		height : 16px;
-		width: 16px;
-		background-size: contain;
-		cursor: pointer;
-	}
+		.footer-strip .feedback_fb_page {
+			height: 16px;
+			width: 16px;
+			background: url("./icons/fb-icon.svg") no-repeat;
+			display: inline-block;
+			cursor: pointer;
+			background-size: contain;
+			left: 35px;
+			position: absolute;
+			filter: gray; /* IE6-9 */
+			-webkit-filter: grayscale(1); /* Google Chrome, Safari 6+ & Opera 15+ */
+			filter: grayscale(1);
+		}
+		.footer-strip .feedback_fb_page:hover {
+			-webkit-filter: grayscale(0);
+			filter: none;
+		}
+		.footer-strip .syncInfo {
+			opacity: 0.3;
+			display: inline-block;
+			vertical-align: 3px;
+			position: absolute;
+			right: 10px;
+		}
+		/**======================
+		Action Menu Styles
+		=======================**/
+		
+		.arrow-up {}
+		
+		.actionsBtn {
+			height: 20px;
+			width: 10px;
+			background-image: url("./icons/more.png");
+			background-position-x: 14px;
+			background-position-y: -7px;
+			margin-left: 6px;
+			cursor: pointer;
+		}
+		
+		.action-menu {
+			position: absolute;
+			display: none;
+			background: #FFFFFF;
+			box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
+			border-radius: 3px;
+			padding: 5px 0px;
+		}
+		
+		/*.action-menu::after {
+			-webkit-transform: rotate(360deg);
+			width: 0;
+			height: 0;
+			border-left: 10px solid transparent;
+			border-right: 10px solid transparent;
+			border-bottom: 10px solid grey;
+			content: " ";
+			position: absolute;
+			top: -10px;
+			right: 2px;
+		}*/
+		
+		.action-menu ul,
+		.action-menu li {
+			list-style: none;
+			margin: 0px;
+			padding: 5px 0px;
+		}
+		
+		.action-menu li:hover {
+			background-color: #d3d6d9;
+		}
+		
+		.action-menu li {
+			background-position-x: 7px;
+			background-position-y: 7px;
+			background-repeat: no-repeat;
+			padding: 5px 22px 5px 30px;
+			background-color: white;
+			font-family: Avenir-Book;
+			font-size: 14px;
+			color: #36434D;
+			cursor: pointer;
+		}
+		
+		.action-menu li.print {
+			background-image: url("./icons/icon-print.svg");
+		}
+		
+		.action-menu li.download {
+			background-image: url("./icons/icon-download.svg");
+		}
 	</style>
 </head>
 
@@ -235,37 +368,52 @@
 
 	<div class="container">
 		<div class="folderMenu">
-			<input disabled = "disabled" type="text" class = "folder-search search" placeholder="Search Notes.."/>
+			<input disabled="disabled" type="text" class="folder-search search" placeholder="Search Notes.." />
 			<div class="folder-items"></div>
 			<div class="trash"></div>
-			<div class="btn trashed">
-				<div>Recycle Bin</div>
+			<div class="trashed">
+				<span class="activeModeText">Recycle bin Notes</span>
 			</div>
 		</div>
 		<div class="rpanel">
 			<div class="header-strip">
-				<div class = "collapse-action collapse-arrow"></div>
+				<div class="collapse-action collapse-arrow"></div>
 
-				<div class = "right-actions">
+				<div class="right-actions">
 					<div class="delete-action"></div>
-					<div class = "btn newNoteBtn">New Note</div>
+					<div class="btn newNoteBtn">New Note</div>
+					<div class="actionsBtn"></div>
 				</div>
 			</div>
 			<div class="content-display">
-				<textarea autofocus = "true" id = "notepad" placeholder="Write something here !!" wrap="hard"></textarea>
+				<textarea autofocus="true" id="notepad" placeholder="Write something here !!" wrap="hard"></textarea>
 				<div class="trash-note-preview"></div>
 			</div>
 			<div class="footer-strip">
-				<a class="settings" title="Settings" href = "" target="_blank"></a>
-				<div style="opacity: 0.3;">Last synchronization on : <span class="sync"></span></div>
+				<a class="settings" title="Settings" href="" target="_blank"></a>
+				<a class="feedback_fb_page" title="Give us your feedback on our facebook page" target="_blank" href="https://www.facebook.com/ChromeNotepad/"></a>
+				<div class="syncInfo">Last synchronization on : <span class="sync"></span></div>
 			</div>
+		</div>
+		<div class="action-menu">
+			<div class="arrow-up"></div>
+			<ul>
+				<li class="download download-btn">Download</li>
+				<li class="print print-btn">Print</li>
+			</ul>
 		</div>
 	</div>
 
-	<script src = "js/ga.js"></script>
-	<script src ="js/jquery.min.js"></script>
-	<script src ="js/jquery-ui.min.js"></script>
-	<script src ="js/js.js"></script>
+	<script src="js/ga.js"></script>
+	<script src="js/jquery.min.js"></script>
+	<script src="js/jquery-ui.min.js"></script>
+	<script src="js/utils.js"></script>
+	<script src="js/model.js"></script>
+	<script src="js/actions.js"></script>
+	<link rel="stylesheet" href="css/shareForm.css">
+	<script src="js/shareView.js"></script>
+	<script src="js/view.js"></script>
 
 </body>
+
 </html>

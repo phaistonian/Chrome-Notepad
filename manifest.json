@@ -2,7 +2,7 @@
   "name"			        : "Notepad",
   "description"		    : "A very simple notepad for Chrome with sync functionality.",
   "background": {
-      "scripts": ["js/jquery.min.js","js/js.js","background.js"]
+      "scripts": ["js","background.js"]
    },
     "options_page"      : "options.html",
 
