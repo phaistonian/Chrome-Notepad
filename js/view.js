@@ -23,7 +23,7 @@ View.prototype.initialize = function() {
     
     this.model = new Model();
     this._shareView = Object.create(ShareView);
-    this._shareView.init(20, 22);
+    this._shareView.init(21, 22);
     this.shareFormTemplate = '' +
         '<div id="dialog-form" title="Share Note">' +
           '<div class="content">' +

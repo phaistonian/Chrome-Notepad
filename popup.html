@@ -67,7 +67,6 @@
 			width: 180px;
 			background-color: #eeeeee;
 			box-sizing: border-box;
-			padding: 5px;
 			height: 100vh;
 			display: flex;
 			flex-direction: column;
@@ -137,12 +136,13 @@
 		}
 		
 		.folder-search {
-			height: 25px;
+			height: 26px;
 			border: none;
 			font-size: 14px;
-			padding: 5px;
-			border-radius: 10px;
+			padding: 5px 9px;
+			border-radius: 48px;
 			outline: none;
+			margin: 7px 5px 5px;
 		}
 		
 		.delete-action {
@@ -170,28 +170,34 @@
 			color: #000000;
 			font-size: 12px;
 			padding: 6px 0;
-			border-top: 1px solid #dddddd;
+			border-top: 1px solid rgba(151, 151, 151, 0.1);
 		}
 		
 		.trashed {
 			font-family: Avenir-Light;
 			cursor: pointer;
-			background-color: inherit;
-			bottom: 5px;
-			position: absolute;
 			font-size: 12px;
 			color: #00AB74;
+			padding: 5px 10px;
+			border-top: 1px solid rgba(151, 151, 151, 0.2);
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			height: 28px;
 		}
 
 		.trashed .activeNos {
 			background: #FFFFFF;
 			border: 1px solid #C1C1C1;
 			border-radius: 16px;
-			width: 21px;
+			min-width: 21px;
 			height: 16px;
 			margin-left: 5px;
 			font-size: 11px;
 			color: #000000;
+			display: inline-block;
+			vertical-align: top;
+			text-align: center;
 		}
 		
 		.trashed.active .backArrow{
@@ -204,8 +210,9 @@
 			overflow-x: hidden;
 			overflow-y: auto;
 			height: 84vh;
-			padding: 0 0 6px 0;
-			margin-top: 11px;
+			padding: 3px 5px 6px 12px;
+			flex-grow: 1;
+			width: 100%;
 		}
 		
 		.trash {
@@ -235,23 +242,25 @@
 		}
 		
 		.restore {
-			background: url("./icons/restore.svg");
+			background: url("./icons/restore.svg") no-repeat;
 			display: inline-block;
-			height: 16px;
+			height: 13px;
 			width: 16px;
 			background-size: contain;
+			vertical-align: text-top;
 		}
 		
 		.delete {
-			background: url("./icons/delete_forever.svg");
+			background: url("./icons/delete.svg") no-repeat;
 			display: inline-block;
-			height: 16px;
+			height: 13px;
 			width: 16px;
 			background-size: contain;
+			vertical-align: text-top;
 		}
 		
 		.footer-strip .settings {
-			background: url("./icons/settings.svg");
+			background: url("./icons/settings.svg") no-repeat;
 			height: 16px;
 			width: 16px;
 			background-size: contain;
@@ -305,8 +314,7 @@
 			display: none;
 			background: #FFFFFF;
 			box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.50);
-			border-radius: 3px 0 0 0 3px 3px 3px;
-			display: none;
+			border-radius: 3px;
 			padding: 5px 0px;
 		}
 		
@@ -326,7 +334,6 @@
 		.action-menu ul,
 		.action-menu li {
 			list-style: none;
-			padding: 0px;
 			margin: 0px;
 			padding: 5px 0px;
 		}
@@ -364,7 +371,7 @@
 			<input disabled="disabled" type="text" class="folder-search search" placeholder="Search Notes.." />
 			<div class="folder-items"></div>
 			<div class="trash"></div>
-			<div class="btn trashed">
+			<div class="trashed">
 				<span class="activeModeText">Recycle bin Notes</span>
 			</div>
 		</div>

@@ -5,22 +5,41 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: #aaaaaa;
-    opacity: .3;
-    filter: Alpha(Opacity=30);
+    background: #000;
+    opacity: .4;
+    filter: Alpha(Opacity=40);
 }
 .ui-dialog {
     z-index: 101;
+    background: #FFFFFF;
+    box-shadow: 0 0 2px 0 rgba(0,0,0,0.50);
+    position: absolute;
+    margin: auto;
+    border-radius: 3px;
+}
+.ui-dialog-titlebar {
+    padding: 9px 14px;
+    font-size: 16px;
+    font-family: Avenir-Medium;
+}
+.ui-dialog-content {
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: Avenir-Book;
+}
+.ui-dialog-titlebar-close {
+    border: none;
+    background: url(../icons/Exit.svg) no-repeat;
+    text-indent: -9999px;
+    height: 14px;
+    width: 14px;
+    float: right;
+    cursor: pointer;
 }
 #dialog-form {
     display: none;
-    background: #FFFFFF;
-    box-shadow: 0 0 2px 0 rgba(0,0,0,0.50);
-    font-family: Avenir-Book;
-    font-size: 14px;
+
     letter-spacing: -0.32px;
-}
-#dialog-form .content {
 }
 #dialog-form .formContent {
     display: flex;
@@ -29,6 +48,7 @@
 #dialog-form label {
     color: #374353;
     letter-spacing: 0;
+    line-height: 28px;
 }
 #dialog-form .text {
     font-size: 13px;
@@ -36,9 +56,13 @@
     letter-spacing: 0;
     width: 211px;
     height: 28px;
-    padding : 5px 11px 7px;
+    padding : 5px 7px;
     margin-left: 10px;
     margin-right: 10px;
+    outline: none;
+    border-radius: 3px;
+    border: 1px solid #979797;
+    opacity: 0.5;
 }
 #dialog-form .cpy {
     background: #00AB74;
@@ -51,6 +75,9 @@
     display: inline-block;
     padding: 3px 9px 4px 14px;
     cursor: pointer;
+}
+#dialog-form .footer {
+    margin: 19px 0 10px 0;
 }
 #dialog-form .footer .note {
     width: 235px;
@@ -66,9 +93,7 @@
     font-size: 14px;
     color: #00AB74;
     letter-spacing: 0;
-    width: 81px;
     text-align: center;
-    margin-left: auto;
-    margin-right: auto;
     cursor: pointer;
+    margin-top: 5px;
 }
