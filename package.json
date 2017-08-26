@@ -9,11 +9,15 @@
     "build": "npm version patch && gulp && open https://chrome.google.com/webstore/developer/dashboard && open ."
   },
   "devDependencies": {
+    "del": "^3.0.0",
     "gulp": "github:gulpjs/gulp#4.0",
     "gulp-bump": "*",
     "gulp-cheerio": "^0.6.2",
+    "gulp-clean": "^0.3.2",
+    "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.2",
     "gulp-rimraf": "^0.2.0",
+    "gulp-uglify": "^3.0.0",
     "gulp-zip": "*"
   }
 }
