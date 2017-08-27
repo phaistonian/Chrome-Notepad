@@ -6,7 +6,8 @@
   "author": "George Papadakis <phaistonian@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "npm version patch && gulp && open https://chrome.google.com/webstore/developer/dashboard && open ."
+    "build": "npm version patch && gulp && open https://chrome.google.com/webstore/developer/dashboard && open .",
+    "build-minor": "npm version minor && gulp && open https://chrome.google.com/webstore/developer/dashboard && open ."
   },
   "devDependencies": {
     "del": "^3.0.0",
