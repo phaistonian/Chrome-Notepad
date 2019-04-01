@@ -1,17 +1,18 @@
 {
   "name": "Chrome-Notepad",
-  "version": "5.4.1",
+  "version": "5.2.13",
   "main": "index.js",
   "repository": "https://github.com/phaistonian/Chrome-Notepad.git",
   "author": "George Papadakis <phaistonian@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "npm version patch && gulp && open https://chrome.google.com/webstore/developer/dashboard && open .",
-    "build-minor": "npm version minor && gulp && open https://chrome.google.com/webstore/developer/dashboard && open ."
+    "build": "npm version patch && gulp && open https://chrome.google.com/webstore/developer/dashboard && open ."
   },
   "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
     "del": "^3.0.0",
-    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-babel": "^8.0.0",
     "gulp-bump": "*",
     "gulp-cheerio": "^0.6.2",
     "gulp-clean": "^0.3.2",
@@ -20,5 +21,8 @@
     "gulp-rimraf": "^0.2.0",
     "gulp-uglify": "^3.0.0",
     "gulp-zip": "*"
+  },
+  "dependencies": {
+    "gulp": "^4.0.0"
   }
 }
