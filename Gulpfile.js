@@ -60,6 +60,7 @@ gulp.task('zip', cb => {
     './icons/**',
     './js/**',
     './dist/**',
+    './tinymce/**',
     './manifest.json',
     './background.js',
     './options.html',
