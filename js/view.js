@@ -30,8 +30,9 @@ View.prototype.initTinymce = function(settings) {
         font_formats: 'Webkit-pictograph=-webkit-pictograph;Webkit-body=-webkit-body;Fantasy=fantasy;Cursive=cursive;Monospace=monospace;arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;Sans Serif=sans-serif;Serif=serif',
         menubar: false,
         plugins: [ //charmap paste insertdatetime fullscreen searchreplace print image media contextmenu backcolor forecolor visualblocks link autoresize autolink
-            'advlist lists table',
+            'advlist lists table paste',
         ],
+        paste_as_text: true,
         toolbar: 'insert | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table print',
         content_css: ['/css/editorStyles.css'],
         contextmenu: "",
