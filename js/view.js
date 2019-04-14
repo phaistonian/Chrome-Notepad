@@ -40,8 +40,15 @@ View.prototype.initTinymce = function(settings) {
         width: '100%',
         height: 'auto',
         setup: (editor) => {
-            
+            var content = "";
+            editor.on("Undo", function(e) {
+                if(editor.getContent() === "") {
+                    self.setContent(content);
+                }
+            });
+
             editor.on('keyup', function(e) {
+                content = editor.getContent() || content;
                 self.save(editor.getContent());
             });
             //wen toolbar option selected. useful wen text is selected and then toolbar option is selected
