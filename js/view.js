@@ -33,22 +33,17 @@ View.prototype.initTinymce = function(settings) {
             'advlist lists table paste',
         ],
         paste_as_text: true,
-        toolbar: 'insert | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table print',
+        toolbar: 'insert | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | table',
         content_css: ['/css/editorStyles.css'],
+        extended_valid_elements : 'div/p[*]',//added to remove custom css on p tag
+        forced_root_block : "div",
         contextmenu: "",
+        remove_trailing_brs: false,
         content_style: `body { font-size: ${settings.fontSize}; font-family: ${settings.fontFamily} !important; }`,
         width: '100%',
         height: 'auto',
         setup: (editor) => {
-            var content = "";
-            editor.on("Undo", function(e) {
-                if(editor.getContent() === "") {
-                    self.setContent(content);
-                }
-            });
-
             editor.on('keyup', function(e) {
-                content = editor.getContent() || content;
                 self.save(editor.getContent());
             });
             //wen toolbar option selected. useful wen text is selected and then toolbar option is selected
@@ -396,6 +391,7 @@ View.prototype.getContent = function() {
 View.prototype.setContent = function(content) {
     this.tinymceDef.then(() => {
         tinymce.activeEditor.setContent(content);
+        tinymce.activeEditor.undoManager.clear();
         this.setfocusInEditor();
     });
 }

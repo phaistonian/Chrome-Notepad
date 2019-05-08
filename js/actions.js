@@ -1,5 +1,5 @@
 function Actions() {
-    this.$el = $(".action-menu");
+    this.$el = $(".notepad-action-menu");
     this.bindEvents();
 }
 Actions.prototype.bindEvents = function() {
