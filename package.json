@@ -6,7 +6,7 @@
   "author": "George Papadakis <phaistonian@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "yarn version --patch && gulp && open https://chrome.google.com/webstore/developer/dashboard && open ."
+    "build": "yarn version --patch && open https://chrome.google.com/webstore/developer/dashboard && open ."
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
