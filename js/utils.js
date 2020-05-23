@@ -37,6 +37,7 @@ var Utils = {
         return inStr.replace(/\r\n?|\n/g, "<br />");
     },
     trackGoogleEvent: function(eventType) {
+        return;
         if (eventType === "NOTE_CREATION") {
             _gaq.push(['_trackEvent', "NoteCreated", 'clicked', "NoteCreated"]);
         } else if (eventType === "NOTE_SOFT_DELETION") {

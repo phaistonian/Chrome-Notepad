@@ -2,6 +2,7 @@ const NEW = "NEW";
 var BOOKMARK_NAME = "CuteNotepad";
 var TRASH_BOOKMARK_NAME = "trashedNotes";
 var SUBSTRING_END_INDEX = 15;
+const RECENTLY_UPDATED_COUNT = 4;
 var Model = {
     bookmarkData: {}
 };
@@ -15,16 +16,17 @@ var ContextMenuBuilder = function () {
         chrome.contextMenus.removeAll();
         chrome.contextMenus.create({
             id: NEW,
-            title: "Add to a new note",
+            title: "Create into a new note",
             contexts:["selection"]
         });
-        notes.forEach(function (note) {
+        for (var i = 0; i < notes.length; i++) {
+            if (i > RECENTLY_UPDATED_COUNT) break;
             chrome.contextMenus.create({
-                id: note.id,
-                title: "Add to " + note.title,
+                id: notes[i].id,
+                title: "Add to " + notes[i].title,
                 contexts:["selection"]
             });
-        });
+        }
         chrome.contextMenus.onClicked.addListener(updateNote);
     }
 
@@ -40,8 +42,11 @@ var ContextMenuBuilder = function () {
             chrome.bookmarks.update(note[0].id, {
                 title: content.substring(0, 15),
                 url: "data:text/plain;charset=UTF-8," + content + getNewContent(itemData)
-            }, function () {
-                // if there is anything to do
+            }, updatedNote => {
+                const index = notes.findIndex(note => note.id === updatedNote.id);
+                notes.splice(index, 1);
+                notes.unshift(updatedNote);
+                setUpContextMenus();
             });
         }
     }
@@ -61,7 +66,7 @@ var ContextMenuBuilder = function () {
             title: getTitleFromContent(itemData.selectionText),
             url: "data:text/plain;charset=UTF-8," + newContent
         }, function(bookmarkNode) { // new note
-            notes.push(bookmarkNode);
+            notes.unshift(bookmarkNode);
             setUpContextMenus();
         });
     }
@@ -118,6 +123,20 @@ function launchNotes() {
                     if (!item.children) {
                         item.deleted = item.deleted ? item.deleted : false;
                         activeNotes.push(item);
+                    }
+                });
+                var orderMap = localStorage['orderMap'] &&
+                    (typeof localStorage['orderMap'] === "string") &&
+                    JSON.parse(localStorage['orderMap']) || {};
+
+                activeNotes.sort((a, b) => {
+                    //Means no children - if children then it means it is a trash notes folder
+                    if (!(a.children || b.children)) {
+                        if (orderMap[a.id] && orderMap[b.id]) {
+                            return orderMap[a.id].displayOrder - orderMap[b.id].displayOrder;
+                        } else {
+                            return 1;
+                        }
                     }
                 });
                 ContextMenuBuilder.buildWith(activeNotes);
