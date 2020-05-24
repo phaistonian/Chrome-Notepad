@@ -66,6 +66,21 @@ View.prototype.onInitTinyMce = function(e) {
     });
     this.tinymceDef.resolve();
 };
+View.prototype.giveCoronaFooterMessage = function () {
+    const messageObj = getBgPg().getCoronaMessage();
+    var startIndex = 0;
+    var endIndex = messageObj.message.length;
+    var intervalId = setInterval(() => {
+        // My super code goes here
+        const currentText = this.$el.find(".staysafe").html();
+        this.$el.find(".staysafe").html(currentText + messageObj.message[startIndex++]);
+        if (startIndex === endIndex) {
+            (clearInterval(intervalId));
+            const currentText = this.$el.find(".staysafe").html();
+            this.$el.find(".staysafe").html(currentText + messageObj.emoji);
+        }
+    }, 100);
+};
 View.prototype.initialize = function() {
     if (this.initialized === true) return;
     this.initialized = true;
@@ -98,7 +113,7 @@ View.prototype.initialize = function() {
     });
 
     this.$el.find(".sync").html(Utils.getDT(getModel().data.synced));
-    this.$el.find(".staysafe").html(getBgPg().getCoronaMessage());
+    this.giveCoronaFooterMessage();
 
     if (getModel().collapsed) {
         this.$el.find(".rpanel").css({ width: "100%" });
