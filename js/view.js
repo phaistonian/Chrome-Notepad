@@ -112,7 +112,7 @@ View.prototype.initialize = function() {
         this.initTinymce(item);
     });
 
-    this.$el.find(".sync").html(Utils.getDT(getModel().data.synced));
+    getModel().data && getModel().data.synced && this.$el.find(".sync").html(Utils.getDT(getModel().data.synced));
     this.giveCoronaFooterMessage();
 
     if (getModel().collapsed) {
