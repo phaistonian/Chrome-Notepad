@@ -178,9 +178,10 @@ View.prototype.save = function(content) {
             url: "data:text/plain;charset=UTF-8," + Utils.encodePercentSymbol(content)
         }, function(updatedNote) {
             self.$el.find('.folder-items').find(`[data-bid='${getModel().selectedNoteId}']`).html(title);
+            // get updated one and update context menu so that its at the top
             const index = self.activeNotes.findIndex(note => note.id === updatedNote.id);
             self.activeNotes.splice(index, 1);
-            self.activeNotes.splice(index, 0, updatedNote);
+            self.activeNotes.splice(0,0, updatedNote);
             getBgPg().ContextMenuBuilder.buildWith(self.activeNotes);
         });
     }, 250);
