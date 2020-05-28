@@ -42,7 +42,7 @@ var ContextMenuBuilder = function () {
                 content = decodeURIComponent(content) + getNewContent(itemData);
                 chrome.bookmarks.update(note[0].id, {
                     title: getTitleFromContent(content),
-                    url: "data:text/plain;charset=UTF-8," + content
+                    url: "data:text/plain;charset=UTF-8," + encodePercentSymbol(content)
                 }, updatedNote => {
                     const index = notes.findIndex(note => note.id === updatedNote.id);
                     notes.splice(index, 1);
@@ -61,6 +61,10 @@ var ContextMenuBuilder = function () {
         return d.textContent.trim().substring(0, SUBSTRING_END_INDEX) || "New Note";
     }
 
+    function encodePercentSymbol(str) {
+        return str.replace(/%/g, "%25");
+    }
+
     /**
      * when we select 'add to a new note' in contextmenu
      * @param itemData
@@ -70,7 +74,7 @@ var ContextMenuBuilder = function () {
         chrome.bookmarks.create({
             parentId: Model.bookmarkData.id,
             title: getTitleFromContent(itemData.selectionText),
-            url: "data:text/plain;charset=UTF-8," + newContent
+            url: "data:text/plain;charset=UTF-8," + encodePercentSymbol(newContent)
         }, function(bookmarkNode) { // new note
             notes.unshift(bookmarkNode);
             setUpContextMenus();
