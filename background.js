@@ -37,22 +37,28 @@ var ContextMenuBuilder = function () {
             var note = notes.filter(function(note) {
                 return note.id === itemData.menuItemId;
             });
-            var content = note[0].url.replace("data:text/plain;charset=UTF-8,", "");
-            content = decodeURIComponent(content);
-            chrome.bookmarks.update(note[0].id, {
-                title: content.substring(0, 15),
-                url: "data:text/plain;charset=UTF-8," + content + getNewContent(itemData)
-            }, updatedNote => {
-                const index = notes.findIndex(note => note.id === updatedNote.id);
-                notes.splice(index, 1);
-                notes.unshift(updatedNote);
-                setUpContextMenus();
-            });
+            if (note.length === 1) {
+                var content = note[0].url.replace("data:text/plain;charset=UTF-8,", "");
+                content = decodeURIComponent(content) + getNewContent(itemData);
+                chrome.bookmarks.update(note[0].id, {
+                    title: getTitleFromContent(content),
+                    url: "data:text/plain;charset=UTF-8," + content
+                }, updatedNote => {
+                    const index = notes.findIndex(note => note.id === updatedNote.id);
+                    notes.splice(index, 1);
+                    notes.unshift(updatedNote);
+                    setUpContextMenus();
+                });
+            } else {
+                // very unlikely todo log
+            }
         }
     }
 
     function getTitleFromContent(content) {
-        return content.substring(0, SUBSTRING_END_INDEX) || "New Note";
+        var d = document.createElement('div');
+        d.innerHTML = content;
+        return d.textContent.trim().substring(0, SUBSTRING_END_INDEX) || "New Note";
     }
 
     /**
