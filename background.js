@@ -1,3 +1,4 @@
+// todo add google analytics
 const NEW = "NEW";
 var BOOKMARK_NAME = "CuteNotepad";
 var TRASH_BOOKMARK_NAME = "trashedNotes";
@@ -44,6 +45,7 @@ var ContextMenuBuilder = function () {
                     title: getTitleFromContent(content),
                     url: "data:text/plain;charset=UTF-8," + encodePercentSymbol(content)
                 }, updatedNote => {
+                    // todo track context menu used to add to existing view
                     const index = notes.findIndex(note => note.id === updatedNote.id);
                     notes.splice(index, 1);
                     notes.unshift(updatedNote);
@@ -76,6 +78,7 @@ var ContextMenuBuilder = function () {
             title: getTitleFromContent(itemData.selectionText),
             url: "data:text/plain;charset=UTF-8," + encodePercentSymbol(newContent)
         }, function(bookmarkNode) { // new note
+            // todo track context menu used to add to new view
             notes.unshift(bookmarkNode);
             setUpContextMenus();
         });
