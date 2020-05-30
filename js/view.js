@@ -64,6 +64,9 @@ View.prototype.onInitTinyMce = function(e) {
     tinymce.activeEditor.on('ObjectResized', function(e) {
         self.save(self.getContent());
     });
+    tinymce.activeEditor.on('ExecCommand', function(e) {
+        Utils.trackGoogleEvent("EDITOR_COMMAND_USE", e.command === "mceToggleFormat" ? e.value : e.command);
+    });
     this.tinymceDef.resolve();
 };
 View.prototype.giveCoronaFooterMessage = function () {
