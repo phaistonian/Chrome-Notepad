@@ -120,41 +120,47 @@ chrome.runtime.onInstalled.addListener(function(details) {
 });
 
 function launchNotes() {
-    loadLocalData();
-    chrome.bookmarks.search(BOOKMARK_NAME, function(bookmarkTreeNodes) {
-         // bookmarkTreeNodes sample "[{"dateAdded":1580827736483,"dateGroupModified":1589585176156,"id":"512","index":1,"parentId":"2","title":"CuteNotepad"}]"
-        if (bookmarkTreeNodes.length === 0) {
-            // fresh
-            bootstrapNotes(launchTrash);
-        } else {
-            Model.bookmarkData = bookmarkTreeNodes[0];
-            launchTrash();
-            chrome.bookmarks.getSubTree(Model.bookmarkData.id, function(bookmarkTreeNodes) {
-                var activeNotes = [];
-                bookmarkTreeNodes[0].children.forEach((item) => {
-                    //No children means they are active notes.
-                    if (!item.children) {
-                        item.deleted = item.deleted ? item.deleted : false;
-                        activeNotes.push(item);
-                    }
-                });
-                var orderMap = localStorage['orderMap'] &&
-                    (typeof localStorage['orderMap'] === "string") &&
-                    JSON.parse(localStorage['orderMap']) || {};
 
-                activeNotes.sort((a, b) => {
-                    //Means no children - if children then it means it is a trash notes folder
-                    if (!(a.children || b.children)) {
-                        if (orderMap[a.id] && orderMap[b.id]) {
-                            return orderMap[a.id].displayOrder - orderMap[b.id].displayOrder;
-                        } else {
-                            return 1;
+    return new Promise(resolve => {
+        loadLocalData();
+        chrome.bookmarks.search(BOOKMARK_NAME, function(bookmarkTreeNodes) {
+            // bookmarkTreeNodes sample "[{"dateAdded":1580827736483,"dateGroupModified":1589585176156,"id":"512","index":1,"parentId":"2","title":"CuteNotepad"}]"
+            if (bookmarkTreeNodes.length === 0) {
+                // fresh
+                bootstrapNotes(launchTrash);
+            } else {
+                Model.bookmarkData = bookmarkTreeNodes[0];
+                launchTrash();
+                chrome.bookmarks.getSubTree(Model.bookmarkData.id, function(bookmarkTreeNodes) {
+                    var activeNotes = [];
+                    bookmarkTreeNodes[0].children.forEach((item) => {
+                        //No children means they are active notes.
+                        if (!item.children) {
+                            item.deleted = item.deleted ? item.deleted : false;
+                            activeNotes.push(item);
                         }
-                    }
+                    });
+                    var orderMap = localStorage['orderMap'] &&
+                        (typeof localStorage['orderMap'] === "string") &&
+                        JSON.parse(localStorage['orderMap']) || {};
+
+                    activeNotes.sort((a, b) => {
+                        //Means no children - if children then it means it is a trash notes folder
+                        if (!(a.children || b.children)) {
+                            if (orderMap[a.id] && orderMap[b.id]) {
+                                return orderMap[a.id].displayOrder - orderMap[b.id].displayOrder;
+                            } else {
+                                return 1;
+                            }
+                        }
+                    });
+                    ContextMenuBuilder.buildWith(activeNotes);
+                    resolve();
                 });
-                ContextMenuBuilder.buildWith(activeNotes);
-            });
-        }
+            }
+        });
+    }, reject => {
+        // unlikely todo
     });
 }
 

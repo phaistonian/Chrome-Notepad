@@ -107,6 +107,15 @@ View.prototype.initialize = function() {
         '</div>' +
         '</div>';
 
+    if (!getModel().bookmarkData.id) {
+        getBgPg().launchNotes().then(() => {
+            this.setUp();
+        });
+    } else {
+        this.setUp();
+    }
+};
+View.prototype.setUp = function () {
 
     getBgPg().loadConfig((item) => {
         var height = Number(item.size);
