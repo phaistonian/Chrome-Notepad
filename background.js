@@ -238,12 +238,12 @@ function loadConfig(cb) {
 }
 
 function getCoronaMessage() {
-    var messages = [{message: "Coronavirus: Do not leave your home ", emoji: "🏡"},
-        {message: "Coronavirus: Regularly and thoroughly clean your hands ", emoji: "👐"},
-        {message: "Coronavirus: Stay at least 3 feet away from others ", emoji: "⇠⇢"},
+    var messages = [{message: "Coronavirus: Do not leave your home", emoji: "🏡"},
+        {message: "Coronavirus: Regularly and thoroughly clean your hands", emoji: "👐"},
+        {message: "Coronavirus: Stay at least 3 feet away from others", emoji: "⇠⇢"},
         {message: "Coronavirus: Work from home if you can ", emoji: "💻"},
-        {message: "Coronavirus: If unwell isolate yourself from family ", emoji: "😷"},
-        {message: "Coronavirus: Cover coughs and sneezes ", emoji: "💦"}
+        {message: "Coronavirus: If unwell isolate yourself from family", emoji: "😷"},
+        {message: "Coronavirus: Cover coughs and sneezes", emoji: "💦"}
     ];
 
     return messages[Math.floor(Math.random() * Math.floor(messages.length))];
