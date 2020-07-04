@@ -411,13 +411,15 @@ View.prototype.renderDeletedNotes = function(cb) {
     });
 };
 View.prototype.deleteActiveNote = function (selectedNoteId) {
-    const index = this.activeNotes.findIndex(note => note.id !== selectedNoteId);
+    const index = this.activeNotes.findIndex(note => note.id === selectedNoteId);
     this.inactiveNotes.push(this.activeNotes[index]);
     this.activeNotes.splice(index, 1);
     getBgPg().ContextMenuBuilder.buildWith(this.activeNotes)
 };
-View.prototype.addToActiveNotes = function (note) {
-    this.activeNotes.push(note);
+View.prototype.addToActiveNotes = function (noteToRestore) {
+    const index = this.inactiveNotes.findIndex(note => note.id === noteToRestore.id);
+    this.activeNotes.push(noteToRestore);
+    this.inactiveNotes.splice(index, 1);
     getBgPg().ContextMenuBuilder.buildWith(this.activeNotes)
 };
 View.prototype.setReadMode = function(flag) {
