@@ -262,6 +262,7 @@ View.prototype.createNote = function(content) {
         if (this.$el.find(".folder-name").length === 1) {
             this.save(this.getContent());
         }
+        this.updateDisplayOrder()
     });
 };
 View.prototype.hightlightSelected = function() {
