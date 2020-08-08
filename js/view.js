@@ -72,31 +72,7 @@ View.prototype.onInitTinyMce = function(e) {
 View.prototype.giveCoronaFooterMessage = function () {
     $ele = this.$el.find(".staysafe");
     const messageObj = getBgPg().getCoronaMessage();
-    var startIndex = 0;
-    var endIndex = messageObj.message.length;
-    // set width of the container of the message
-    $ele.css({visibility: "hidden"});
     $ele.html(messageObj.message + " " + messageObj.emoji);
-    var minWidthToSet = $ele.width();
-    var minHeight = $ele.height();
-    $ele.css({"min-width": minWidthToSet + "px", "min-height": minHeight + "px"});
-    $ele.html("");
-    $ele.css({visibility: "visible"});
-
-    var started = false;
-    var intervalId = setInterval(() => {
-        // My super code goes here
-        if (started === false) {
-            $ele.html(messageObj.emoji + " ");
-            started = true;
-        } else {
-            const currentText = $ele.html();
-            $ele.html(currentText + messageObj.message[startIndex++]);
-        }
-        if (startIndex === endIndex) {
-            (clearInterval(intervalId));
-        }
-    }, 100);
 };
 View.prototype.initialize = function() {
     if (this.initialized === true) return;
