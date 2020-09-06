@@ -71,7 +71,7 @@ var Utils = {
     scrollToEnd : function(ele) {
         try {
             var $frame = $(ele);
-            $($frame).contents().scrollTop($($frame).height());
+            $($frame).contents().scrollTop($($frame).contents().height());
         }catch(e) {
             
         }
