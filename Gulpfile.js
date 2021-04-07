@@ -36,7 +36,7 @@ gulp.task('concat', function() {
   return gulp.src(
     ["./js/ga.js", "./js/jquery.min.js", 
     "./js/jquery-ui.min.js", "./tinymce/js/tinymce/tinymce.min.js", "./js/utils.js", 
-    "./js/model.js", "./js/actions.js",
+    "./js/actions.js",
     "./js/shareView.js", "./js/view.js"]
   )
     .pipe(babel({

@@ -1,5 +1,9 @@
-var parentBookmarkId = "0";
-
+function getBgPg() {
+    return chrome.extension.getBackgroundPage();
+}
+function getModel() {
+    return getBgPg().Model;
+}
 var View = function() {
     this.initialized = false;
     this.tinymceDef = jQuery.Deferred();
@@ -14,14 +18,12 @@ var View = function() {
         (typeof localStorage['orderMap'] === "string") &&
         JSON.parse(localStorage['orderMap']) || {};
     this.content;
-    this.model = new Model();
-}
+};
 View.prototype.getNoteTitleFromContent = function(content, subStringIndex = 15) {
     var d = document.createElement('div');
     d.innerHTML = content;
     return d.textContent.trim().substring(0, subStringIndex) || "New Note";
-}
-
+};
 View.prototype.initTinymce = function(settings) {
     var self = this;
     tinymce.init({
@@ -55,21 +57,26 @@ View.prototype.initTinymce = function(settings) {
             });
         }
     });
-}
+};
 View.prototype.onInitTinyMce = function(e) {
     var self = this;
     //event wen table/image is resized
     tinymce.activeEditor.on('ObjectResized', function(e) {
         self.save(self.getContent());
     });
+    tinymce.activeEditor.on('ExecCommand', function(e) {
+        Utils.trackGoogleEvent("EDITOR_COMMAND_USE", e.command === "mceToggleFormat" ? e.value : e.command);
+    });
     this.tinymceDef.resolve();
-}
+};
+View.prototype.giveCoronaFooterMessage = function () {
+    $ele = this.$el.find(".staysafe");
+    const messageObj = getBgPg().getCoronaMessage();
+    $ele.html(messageObj.message + " " + messageObj.emoji);
+};
 View.prototype.initialize = function() {
     if (this.initialized === true) return;
     this.initialized = true;
-
-    //Load data from local storage
-    this.model.initialize();
 
     this.$el = $("body");
     this.$textArea = this.$el.find("#notepad");
@@ -90,104 +97,61 @@ View.prototype.initialize = function() {
         '</div>' +
         '</div>';
 
+    if (!getModel().bookmarkData.id) {
+        getBgPg().launchNotes().then(() => {
+            this.setUp();
+        });
+    } else {
+        this.setUp();
+    }
+};
+View.prototype.setUp = function () {
 
-    var self = this;
-    this.model.loadConfig((item) => {
+    getBgPg().loadConfig((item) => {
         var height = Number(item.size);
         height = (height > 600 && height < 300) || !height ? 300 : height;
         document.body.style.height = height + "px";
         this.initTinymce(item);
     });
 
-    this.model.reportSync(this.$el);
+    getModel().data && getModel().data.synced && this.$el.find(".sync").html(Utils.getDT(getModel().data.synced));
+    this.giveCoronaFooterMessage();
 
-    if (this.model.collapsed) {
+    if (getModel().collapsed) {
         this.$el.find(".rpanel").css({ width: "100%" });
         this.$el.find(".collapse-action").removeClass("collapse-arrow").addClass("expand-arrow");
     }
 
     var self = this;
-    this.checkIfBookmarkExists("CuteNotepad", function(data) {
-        //This means bookmark is found for this extension
-        if (data) {
+    this.renderFolders(function(cuteNotepadChildren) {
+        var childrenSansTrash = cuteNotepadChildren.filter(function (child) {
+            return child.children == null
+        });
+        self.$el.find(".folder-name").eq(0).addClass("active");
+        self.content = childrenSansTrash[0] && childrenSansTrash[0].url && childrenSansTrash[0].url.replace("data:text/plain;charset=UTF-8,", "") || "";
 
-            self.model.bookmarkData = data;
-            self.renderFolders(function(cuteNotepadChildren) {
-
-                self.$el.find(".folder-name").eq(0).addClass("active");
-                self.content = cuteNotepadChildren[0] && cuteNotepadChildren[0].url && cuteNotepadChildren[0].url.replace("data:text/plain;charset=UTF-8,", "") || "";
-                //self.setContent(Utils.removeLineBreaks(self.content) || "");
-
-                if (!cuteNotepadChildren.length) {
-                    //Means there is a Root bookmark but no notes. So lets create one note:
-                    self.content = self.model.data && self.model.data.content || "";
-                    self.newNoteInitiator(self.content);
-
-                } else {
-
-                    if (self.$el.find(".folder-name[data-bid='" + self.model.selectedNoteId + "']").length) {
-                        self.$el.find(".folder-name[data-bid='" + self.model.selectedNoteId + "']").trigger("click");
-                    } else {
-                        var _tempChild = cuteNotepadChildren.filter(function(item) {
-                            return !item.children;
-                        });
-                        self.model.selectedNoteId = _tempChild && _tempChild[0] && _tempChild[0].id;
-                        self.$el.find(".folder-name[data-bid='" + self.model.selectedNoteId + "']").trigger("click");
-                    }
-                    //self.renderShareView();
-                }
-
-                self.checkIfBookmarkExists("trashedNotes", function(data) {
-                    if (!data) {
-                        //new subfolder: to hold deleted bookmarks
-                        chrome.bookmarks.create({ "title": "trashedNotes", parentId: self.model.bookmarkData.id }, function(data) {
-                            self.model.trashedFolderData = data;
-                        });
-                    } else {
-                        self.model.trashedFolderData = data;
-                    }
-                });
-            });
+        if (!childrenSansTrash.length) {
+            //Means there is a Root bookmark but no notes. So lets create one note:
+            self.content = "";
+            self.newNoteInitiator(self.content);
         } else {
-            //No bookmark found, hence create one
-            Utils.trackGoogleEvent("INSTALLED");
-            chrome.bookmarks.create({ "title": "CuteNotepad" }, function(newFolder) {
-
-                content = self.model.data && self.model.data.content || "";
-                self.model.bookmarkData = newFolder;
-
-                self.createNote(content, function(note) {
-                    self.renderFolders(function(bookmarksTree) {
-                        if (bookmarksTree && bookmarksTree[0]) {
-                            self.model.selectedNoteId = note.id;
-                            //self.renderShareView();
-                        }
-                        self.$el.find(".folder-name").eq(0).addClass("active");
-                        self.setfocusInEditor();
-
-                        self.checkIfBookmarkExists("trashedNotes", function(data) {
-                            if (!data) {
-                                //new subfolder: to hold deleted bookmarks
-                                chrome.bookmarks.create({ "title": "trashedNotes", parentId: self.model.bookmarkData.id }, function(data) {
-                                    self.model.trashedFolderData = data;
-                                    self.renderDeletedNotes(function() {});
-                                });
-                            } else {
-                                self.model.trashedFolderData = data;
-                            }
-                        });
-                    });
-                });
-
-            });
+            if (self.$el.find(".folder-name[data-bid='" + getModel().selectedNoteId + "']").length) {
+                self.$el.find(".folder-name[data-bid='" + getModel().selectedNoteId + "']").trigger("click");
+            } else {
+                getModel().selectedNoteId = childrenSansTrash && childrenSansTrash[0] && childrenSansTrash[0].id;
+                self.$el.find(".folder-name[data-bid='" + getModel().selectedNoteId + "']").trigger("click");
+            }
         }
+
+        // todo render trashed notes
     });
-    self.bindEvents();
-    self.$el.find(".settings").attr("href", "chrome-extension://" + chrome.runtime.id + "/options.html");
+
+    this.bindEvents();
+    this.$el.find(".settings").attr("href", "chrome-extension://" + chrome.runtime.id + "/options.html");
 };
 View.prototype.renderShareView = function renderShareView() {
-    if (this.mode == "NOTES_ACTIVE") {
-        this._shareView.render(this.$el.find(".right-actions"), this.model.selectedNoteId);
+    if (this.mode === "NOTES_ACTIVE") {
+        this._shareView.render(this.$el.find(".right-actions"), getModel().selectedNoteId);
         this.$el.find(".shareBtn").click(this.invokeShareDialog.bind(this));
     }
 };
@@ -200,26 +164,27 @@ View.prototype.save = function(content) {
     clearTimeout(this.saveTimer);
 
     this.saveTimer = setTimeout(function() {
-
-        if (content !== undefined && content !== self.model.data['content']) {
-            self.model.data['content'] = Utils.encodePercentSymbol(content);
-            self.model.data.updated = new Date().getTime();
-            self.model.data.selectedNoteId = self.model.selectedNoteId;
-            self.model.data.collapsed = self.model.collapsed;
-            self.model.data.synced = +(new Date());
-            self.model.data.deleted = false;
+        if (content !== undefined && content !== getModel().data['content']) {
+            getModel().data['content'] = Utils.encodePercentSymbol(content);
+            getModel().data.updated = new Date().getTime();
+            getModel().data.selectedNoteId = getModel().selectedNoteId;
+            getModel().data.collapsed = getModel().collapsed;
+            getModel().data.synced = +(new Date());
+            getModel().data.deleted = false;
         }
 
-        localStorage['data'] = JSON.stringify(self.model.data);
-
-        chrome.bookmarks.update(self.model.selectedNoteId, {
-            title: self.getNoteTitleFromContent(content),
-            url: "data:text/plain;charset=UTF-8," + Utils.encodePercentSymbol(content) //Utils.addLineBreaks(content)
-        }, function() {
-            self.renderFolders(function(bookmarksTree) {
-                self.searchFolders(self.$el.find(".folder-search").val());
-                self.hightlightSelected();
-            });
+        localStorage['data'] = JSON.stringify(getModel().data);
+        const title = self.getNoteTitleFromContent(content);
+        chrome.bookmarks.update(getModel().selectedNoteId, {
+            title: title,
+            url: "data:text/plain;charset=UTF-8," + Utils.encodePercentSymbol(content)
+        }, function(updatedNote) {
+            self.$el.find('.folder-items').find(`[data-bid='${getModel().selectedNoteId}']`).html(title);
+            // get updated one and update context menu so that its at the top
+            const index = self.activeNotes.findIndex(note => note.id === updatedNote.id);
+            self.activeNotes.splice(index, 1);
+            self.activeNotes.splice(0,0, updatedNote);
+            getBgPg().ContextMenuBuilder.buildWith(self.activeNotes);
         });
     }, 250);
 };
@@ -229,7 +194,7 @@ View.prototype.renderFolders = function(cb) {
 
     self.activeNotes = [];
     self.inactiveNotes = [];
-    chrome.bookmarks.getSubTree(this.model.bookmarkData.id, function(bookmarkTreeNodes) {
+    chrome.bookmarks.getSubTree(getModel().bookmarkData.id, function(bookmarkTreeNodes) {
 
         self.$el.find('.folder-items').empty();
 
@@ -242,7 +207,6 @@ View.prototype.renderFolders = function(cb) {
                     return 1;
                 }
             }
-
         });
 
         sortedChildren.forEach((item) => {
@@ -256,6 +220,7 @@ View.prototype.renderFolders = function(cb) {
                 self.inactiveNotes = item.children;
             }
         });
+        getBgPg().ContextMenuBuilder.buildWith(self.activeNotes);
         var $text = $("<span>").attr({ class: "activeModeText" }).html("Recycle bin Notes");
         var $nos = $("<span>").attr({ class: "activeNos" }).html(self.inactiveNotes.length);
         self.$el.find(".trashed").html("").append($text).append($nos);
@@ -265,46 +230,45 @@ View.prototype.renderFolders = function(cb) {
 };
 View.prototype.newNoteInitiator = function(content) {
     var self = this;
-    self.setContent(decodeURIComponent(Utils.encodeURIComponent(content)));
-
-    this.createNote(content, function(note) {
-        self.model.selectedNoteId = note.id;
-        self.renderFolders(function() {
-            self.$el.find(".folder-name").removeClass("active");
-            self.$el.find(".folder-name[data-bid='" + self.model.selectedNoteId + "']").addClass("active");
-            self.setfocusInEditor();
-            if (self.$el.find(".folder-name").length == 1) {
-                self.save(self.getContent());
-            }
-            //self.renderShareView();
-        });
+    // get editor ready
+    self.setContent(decodeURIComponent(Utils.encodeURIComponent(content)), () => {
+        // create a new bookmark entry
+        this.createNote(decodeURIComponent(Utils.encodeURIComponent(content)));
     });
 };
-View.prototype.createNote = function(content, cb) {
-    var self = this;
+View.prototype.createNote = function(content) {
     chrome.bookmarks.create({
-        parentId: this.model.bookmarkData.id,
-        title: self.getNoteTitleFromContent(content),
-        url: "data:text/plain;charset=UTF-8," + content //Utils.addLineBreaks(content)
-    }, function(note) {
-        self.model.selectedNoteId = note.id;
-        cb && cb(note);
+        parentId: getModel().bookmarkData.id,
+        title: content ? self.getNoteTitleFromContent(content) : "New Note",
+        url: "data:text/plain;charset=UTF-8," + content
+    }, note => {
+        getModel().selectedNoteId = note.id;
+        this.activeNotes.unshift(note);
+        getBgPg().ContextMenuBuilder.buildWith(this.activeNotes);
+        const title = note.title && this.getNoteTitleFromContent(note.title);
+        this.$el.find('.folder-items').prepend(`<div class='folder-name' data-bid='${note.id}'>${title}</div>`);
+        this.hightlightSelected();
+        this.upsertSelectedNote();
+        if (this.$el.find(".folder-name").length === 1) {
+            this.save(this.getContent());
+        }
+        this.updateDisplayOrder()
     });
 };
 View.prototype.hightlightSelected = function() {
     this.$el.find(".folder-name").removeClass("active");
-    this.$el.find(".folder-name[data-bid='" + this.model.selectedNoteId + "']").addClass("active");
+    this.$el.find(".folder-name[data-bid='" + getModel().selectedNoteId + "']").addClass("active");
 };
 View.prototype.hightlightSelectedDeleted = function() {
     this.$el.find(".deleted-note-name").removeClass("active");
-    this.$el.find(".deleted-note-name[data-bid='" + this.model.deletedSelectedNoteId + "']").addClass("active");
+    this.$el.find(".deleted-note-name[data-bid='" + getModel().deletedSelectedNoteId + "']").addClass("active");
 };
 View.prototype.searchFolders = function(value) {
     var self = this;
     var subset;
-    if (this.mode == "NOTES_ACTIVE") {
+    if (this.mode === "NOTES_ACTIVE") {
         this.activeNotes_searchStr = value;
-        if (value.trim() == "") {
+        if (value.trim() === "") {
             subset = this.activeNotes;
         } else {
             subset = this.activeNotes.filter(function(item) {
@@ -322,7 +286,7 @@ View.prototype.searchFolders = function(value) {
 
     } else {
         self.inactiveNotes_searchStr = value;
-        if (value.trim() == "") {
+        if (value.trim() === "") {
             subset = this.inactiveNotes;
         } else {
             subset = this.inactiveNotes.filter(function(item) {
@@ -340,11 +304,6 @@ View.prototype.searchFolders = function(value) {
     }
 
 };
-View.prototype.checkIfBookmarkExists = function(name, cb) {
-    var bookmarkTreeNodes = chrome.bookmarks.search(name, function(bookmarkTreeNodes) {
-        cb(bookmarkTreeNodes[0]);
-    });
-};
 View.prototype.updateDisplayOrder = function() {
     this.orderMap = {};
     var self = this;
@@ -353,50 +312,43 @@ View.prototype.updateDisplayOrder = function() {
             displayOrder: iter
         }
     });
+    this.activeNotes.sort((a, b) => {
+        if (this.orderMap[a.id] && this.orderMap[b.id]) {
+            return this.orderMap[a.id].displayOrder - this.orderMap[b.id].displayOrder;
+        } else {
+            return 1;
+        }
+    });
+    getBgPg().ContextMenuBuilder.buildWith(this.activeNotes);
     Utils.trackGoogleEvent("NOTE_REORDERED");
     localStorage['orderMap'] = JSON.stringify(this.orderMap);
 };
-View.prototype.loadNotebyId = function(bookmarkId, preview) {
+View.prototype.loadNotebyId = function(bookmarkId, isDeleteNotes) {
     var self = this;
-    if (preview) {
-        chrome.bookmarks.getSubTree(this.model.trashedFolderData.id, function(bookmarkTreeNodes) {
-            var bookmark = bookmarkTreeNodes[0].children.filter(function(item) {
-                return item.id === bookmarkId;
-            });
-
-            var content = bookmark[0] && bookmark[0].url || "";
-            content = content.replace("data:text/plain;charset=UTF-8,", "");
-            //content = Utils.removeLineBreaks(content);
-            content = decodeURIComponent(content);
-            self.setContent(content);
+    chrome.bookmarks.getSubTree(isDeleteNotes ? getModel().trashedFolderData.id : getModel().bookmarkData.id, function(bookmarkTreeNodes) {
+        var bookmark = bookmarkTreeNodes[0].children.filter(function(item) {
+            return item.id === bookmarkId;
         });
-    } else {
-        chrome.bookmarks.getSubTree(this.model.bookmarkData.id, function(bookmarkTreeNodes) {
-            var bookmark = bookmarkTreeNodes[0].children.filter(function(item) {
-                return item.id === bookmarkId;
-            });
 
-            var content = bookmark[0] && bookmark[0].url || "";
-            content = content.replace("data:text/plain;charset=UTF-8,", "");
-            content = decodeURIComponent(content);
-            //content = Utils.removeLineBreaks(content);
-            self.setContent(content);
-        });
-    }
+        var content = bookmark[0] && bookmark[0].url || "";
+        content = content.replace("data:text/plain;charset=UTF-8,", "");
+        content = decodeURIComponent(content);
+        self.setContent(content);
+    });
 };
 View.prototype.getContent = function() {
     // Get the raw contents of the currently active editor
     return tinymce.activeEditor.getContent();
-}
-View.prototype.setContent = function(content) {
+};
+View.prototype.setContent = function(content, cb) {
     this.tinymceDef.then(() => {
         tinymce.activeEditor.setContent(content);
         tinymce.activeEditor.undoManager.clear();
         this.setfocusInEditor();
+        cb && cb();
     });
-}
+};
 View.prototype.setfocusInEditor = function() {
-
     if (tinymce) {
         tinymce.activeEditor.focus();
         tinymce.activeEditor.selection.select(tinymce.activeEditor.getBody(), true);
@@ -405,26 +357,26 @@ View.prototype.setfocusInEditor = function() {
             Utils.scrollToEnd(tinyMCE.activeEditor.iframeElement);
         }
     }
-}
+};
 View.prototype.upsertSelectedNote = function() {
     try {
-        this.model.data.selectedNoteId = this.model.selectedNoteId;
+        getModel().data.selectedNoteId = getModel().selectedNoteId;
     } catch (e) {
         console.info("Error " + e.message);
     }
-    localStorage['data'] = JSON.stringify(this.model.data);
+    localStorage['data'] = JSON.stringify(getModel().data);
 };
 View.prototype.upsertCollapse = function() {
     try {
-        this.model.data.collapsed = this.model.collapsed;
+        getModel().data.collapsed = getModel().collapsed;
     } catch (e) {
         console.info("Error " + e.message);
     }
-    localStorage['data'] = JSON.stringify(this.model.data);
+    localStorage['data'] = JSON.stringify(getModel().data);
 };
 View.prototype.renderDeletedNotes = function(cb) {
     var self = this;
-    chrome.bookmarks.getSubTree(this.model.trashedFolderData.id, function(data) {
+    chrome.bookmarks.getSubTree(getModel().trashedFolderData.id, function(data) {
         self.$el.find('.trash').empty();
         var trashList = data[0].children;
         trashList.forEach(function(item) {
@@ -434,7 +386,18 @@ View.prototype.renderDeletedNotes = function(cb) {
         cb && cb();
     });
 };
-
+View.prototype.deleteActiveNote = function (selectedNoteId) {
+    const index = this.activeNotes.findIndex(note => note.id === selectedNoteId);
+    this.inactiveNotes.push(this.activeNotes[index]);
+    this.activeNotes.splice(index, 1);
+    getBgPg().ContextMenuBuilder.buildWith(this.activeNotes)
+};
+View.prototype.addToActiveNotes = function (noteToRestore) {
+    const index = this.inactiveNotes.findIndex(note => note.id === noteToRestore.id);
+    this.activeNotes.push(noteToRestore);
+    this.inactiveNotes.splice(index, 1);
+    getBgPg().ContextMenuBuilder.buildWith(this.activeNotes)
+};
 View.prototype.setReadMode = function(flag) {
     this.isDeleteMode = flag;
     var editorCtn = tinymce.activeEditor.getContainer();
@@ -445,25 +408,13 @@ View.prototype.setReadMode = function(flag) {
         $(editorCtn).find(".mce-top-part,.tox-toolbar").show();
         tinymce.activeEditor.getBody().setAttribute('contenteditable', true);
     }
-}
+};
 View.prototype.bindEvents = function() {
     var self = this;
     this.$el.find(".newNoteBtn").on("click", function() {
         self.content = "";
-        self.setContent("")
-
-        chrome.bookmarks.create({
-            parentId: self.model.bookmarkData.id,
-            title: "New Note",
-            url: "data:text/plain;charset=UTF-8,"
-        }, function(data) {
-            self.model.selectedNoteId = data.id;
-            self.renderFolders(function() {
-                self.hightlightSelected();
-                self.upsertSelectedNote();
-            });
-        });
-
+        self.setContent(self.content);
+        self.createNote("");
         Utils.trackGoogleEvent("NOTE_CREATION");
     });
 
@@ -472,12 +423,12 @@ View.prototype.bindEvents = function() {
         if ($this.hasClass("expand-arrow")) {
             $this.removeClass("expand-arrow").addClass("collapse-arrow");
             self.$el.find(".rpanel").animate({ width: "620px" });
-            self.model.collapsed = false;
+            getModel().collapsed = false;
         } else {
             Utils.trackGoogleEvent("NOTE_FULL_MODE");
             $this.removeClass("collapse-arrow").addClass("expand-arrow");
             $(".rpanel").animate({ width: "100%" });
-            self.model.collapsed = true;
+            getModel().collapsed = true;
         }
         self.upsertCollapse();
     });
@@ -486,47 +437,49 @@ View.prototype.bindEvents = function() {
         var $this = $(this);
         $(".folder-name").removeClass("active");
         $this.addClass("active");
-        self.model.selectedNoteId = $this.attr("data-bid");
-        self._shareView.setSelectedNote(self.model.selectedNoteId);
+        getModel().selectedNoteId = $this.attr("data-bid");
+        self._shareView.setSelectedNote(getModel().selectedNoteId);
         self.loadNotebyId($this.attr("data-bid"), false);
         self.upsertSelectedNote();
     });
 
     this.$el.find(".delete-action").on("click", function() {
+        // remove from left side tile list
+        self.$el.find(".folder-items .folder-name[data-bid=" + getModel().selectedNoteId + "]").remove();
 
-        // Get the next in order note's bookmark id, so that we make that active 
-        var nextNoteId = self.$el.find(".folder-items .folder-name[data-bid=" + self.model.selectedNoteId + "]").next().attr("data-bid");
+        // Get the next in order note's bookmark id, so that we make that active
+        var nextNoteId = self.$el.find(".folder-items .folder-name[data-bid=" + getModel().selectedNoteId + "]").next().attr("data-bid");
         self.setContent("");
 
-        chrome.bookmarks.move(self.model.selectedNoteId, { parentId: self.model.trashedFolderData.id }, function(data) {
+        chrome.bookmarks.move(getModel().selectedNoteId, { parentId: getModel().trashedFolderData.id }, function () {
 
             Utils.trackGoogleEvent("NOTE_SOFT_DELETION");
 
-            self.renderFolders(function(bookmarksTree) {
+            // update active notes
+            self.deleteActiveNote(getModel().selectedNoteId);
+            // update count of recycle bin
+            self.$el.find(".activeNos").html(self.inactiveNotes.length);
+            var $next;
 
-                var $next;
-
-                if (!nextNoteId && self.$el.find(".folder-items .folder-name").length) {
-                    /*  The case when nextNode wasn't available because it was the last in list
-                        make the first one active in that case
-                    */
-                    $next = self.$el.find(".folder-items .folder-name").eq(0);
-                    nextNoteId = $next.attr("data-bid");
-                } else if (!nextNoteId && !self.$el.find(".folder-items .folder-name").length) {
-                    /*  The case when no more active notes are present 
-                     */
-                    self.newNoteInitiator("");
-                } else {
-                    $next = self.$el.find(".folder-items .folder-name[data-bid=" + nextNoteId + "]");
-                }
-                if ($next) {
-                    $next.addClass("active");
-                    self.model.selectedNoteId = nextNoteId;
-                    self.loadNotebyId(self.model.selectedNoteId);
-                    self.upsertSelectedNote();
-                }
-
-            });
+            if (!nextNoteId && self.$el.find(".folder-items .folder-name").length) {
+                /*  The case when nextNode wasn't available because it was the last in list
+                    make the first one active in that case
+                */
+                $next = self.$el.find(".folder-items .folder-name").eq(0);
+                nextNoteId = $next.attr("data-bid");
+            } else if (!nextNoteId && !self.$el.find(".folder-items .folder-name").length) {
+                /*  The case when no more active notes are present
+                */
+                self.newNoteInitiator("");
+            } else {
+                $next = self.$el.find(".folder-items .folder-name[data-bid=" + nextNoteId + "]");
+            }
+            if ($next) {
+                $next.addClass("active");
+                getModel().selectedNoteId = nextNoteId;
+                self.loadNotebyId(getModel().selectedNoteId);
+                self.upsertSelectedNote();
+            }
         });
     });
 
@@ -564,7 +517,7 @@ View.prototype.bindEvents = function() {
             self.$el.find(".delete-action, .newNoteBtn, .collapse-action, .folder-items, .actionsBtn").show();
             self._shareView.show();
             self.renderFolders();
-            self.loadNotebyId(self.model.selectedNoteId, false);
+            self.loadNotebyId(getModel().selectedNoteId, false);
             self.setReadMode(false);
         }
     });
@@ -580,7 +533,7 @@ View.prototype.bindEvents = function() {
         self.$el.find(".deleted-note-name").removeClass("active");
         $(event.currentTarget).addClass("active");
         var noteId = $(this).attr("data-bid");
-        self.model.deletedSelectedNoteId = noteId;
+        getModel().deletedSelectedNoteId = noteId;
         if (noteId) {
             self.loadNotebyId(noteId, true);
         }
@@ -592,8 +545,12 @@ View.prototype.bindEvents = function() {
         self.setContent("");
         $toRestore.remove();
 
-        chrome.bookmarks.move(noteId, { parentId: self.model.bookmarkData.id }, function(data) {
+        chrome.bookmarks.move(noteId, { parentId: getModel().bookmarkData.id }, function(data) {
             Utils.trackGoogleEvent("NOTE_RESTORATION");
+
+            // update active notes
+            self.addToActiveNotes(data);
+
             title = data.title && self.getNoteTitleFromContent(data.title.substr, 10);
             $('.folder-items').append("<div class = 'folder-name' data-bid = '" + data.id + "'>" + title + "</div>");
         });
@@ -629,9 +586,8 @@ View.prototype.bindEvents = function() {
     this.$el.find(".actionsBtn").click(function() {
         self.actionsView && self.actionsView.show();
     });
-
-
 };
+
 document.addEventListener('DOMContentLoaded', function() {
     if (location.href.indexOf('popup.html') !== -1) {
         // check params
@@ -639,14 +595,12 @@ document.addEventListener('DOMContentLoaded', function() {
         var mode = params.get("print");
 
         // initialize print if print mode else launch app
-        if (mode == "true") {
-            var model = new Model();
-            model.initialize();
-            var selectedId = model.getSelectedNoteId();
+        if (mode === "true") {
+            var selectedId = getModel().selectedNoteId;
             if (selectedId) {
                 try {
                     chrome.bookmarks.get(selectedId, function(arrayOfBookmarks) {
-                        if (arrayOfBookmarks.length == 1) {
+                        if (arrayOfBookmarks.length === 1) {
                             var content = Utils.getDisplayableContent(arrayOfBookmarks[0].url);
                             Utils.printNote(content);
                         }
@@ -658,12 +612,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             $("#printArea").show();
         } else {
+            googleEventForNewInstallation();
             var view = new View();
             view.initialize();
             setTimeout(function() {
                 view.$el.find(".folder-search").removeAttr("disabled");
             }, 500);
         }
-
     }
 }, false);
+
+function googleEventForNewInstallation() {
+    // check if extension new installation or extension update
+    if (localStorage.getItem("isNewInstallation") === null) {
+        // nothing to do
+    } else {
+        if (localStorage.getItem("isNewInstallation") === "true") {
+            Utils.trackGoogleEvent("INSTALLED");
+        } else if (localStorage.getItem("isNewInstallation") === "false" ) {
+            Utils.trackGoogleEvent("EXTENSION_UPDATE");
+        }
+        localStorage.removeItem("isNewInstallation");
+    }
+}

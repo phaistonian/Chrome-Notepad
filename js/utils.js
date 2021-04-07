@@ -36,27 +36,32 @@ var Utils = {
     addLineBreaks: function(inStr) {
         return inStr.replace(/\r\n?|\n/g, "<br />");
     },
-    trackGoogleEvent: function(eventType) {
-        if (eventType == "NOTE_CREATION") {
+    trackGoogleEvent: function(eventType, label) {
+        return;
+        if (eventType === "NOTE_CREATION") {
             _gaq.push(['_trackEvent', "NoteCreated", 'clicked', "NoteCreated"]);
-        } else if (eventType == "NOTE_SOFT_DELETION") {
+        } else if (eventType === "NOTE_SOFT_DELETION") {
             _gaq.push(['_trackEvent', "NoteDeleted", 'clicked', "NoteDeleted"]);
-        } else if (eventType == "NOTE_HARD_DELETION") {
+        } else if (eventType === "NOTE_HARD_DELETION") {
             _gaq.push(['_trackEvent', "NoteDeletetedForever", 'clicked', "NoteDeletetedForever"]);
-        } else if (eventType == "NOTE_RESTORATION") {
+        } else if (eventType === "NOTE_RESTORATION") {
             _gaq.push(['_trackEvent', "NoteRestored", 'clicked', "NoteRestored"]);
-        } else if (eventType == "NOTE_BIN_VISITED") {
+        } else if (eventType === "NOTE_BIN_VISITED") {
             _gaq.push(['_trackEvent', "NoteBinVisited", 'clicked', "NoteBinVisited"]);
-        } else if (eventType == "NOTE_FULL_MODE") {
+        } else if (eventType === "NOTE_FULL_MODE") {
             _gaq.push(['_trackEvent', "NoteFullMode", 'clicked', "NoteFullMode"]);
-        } else if (eventType == "NOTE_REORDERED") {
+        } else if (eventType === "NOTE_REORDERED") {
             _gaq.push(['_trackEvent', "NoteReordered", 'clicked', "NoteReordered"]);
-        } else if (eventType == "NOTE_PRINTED") {
+        } else if (eventType === "NOTE_PRINTED") {
             _gaq.push(['_trackEvent', "NotePrinted", 'clicked', "NotePrinted"]);
-        } else if (eventType == "NOTE_DOWNLOADED") {
+        } else if (eventType === "NOTE_DOWNLOADED") {
             _gaq.push(['_trackEvent', "NoteDownloaded", 'clicked', "NoteDownloaded"]);
-        } else if (eventType == "INSTALLED") {
+        } else if (eventType === "INSTALLED") {
             _gaq.push(['_trackEvent', "Installed", 'clicked', "Installed"]);
+        } else if (eventType === "EXTENSION_UPDATE") {
+            _gaq.push(['_trackEvent', "ExtensionUpdate", 'clicked', "ExtensionUpdate"]);
+        } else if (eventType === "EDITOR_COMMAND_USE") {
+            _gaq.push(['_trackEvent', "EditorCommandUse", 'clicked', label]);
         }
     },
     getDisplayableContent: function(urlKey) {
@@ -66,7 +71,7 @@ var Utils = {
     scrollToEnd : function(ele) {
         try {
             var $frame = $(ele);
-            $($frame).contents().scrollTop($($frame).height());
+            $($frame).contents().scrollTop($($frame).contents().height());
         }catch(e) {
             
         }

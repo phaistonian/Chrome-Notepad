@@ -19,6 +19,7 @@
     },
 
     "permissions": [
+        "contextMenus",
         "bookmarks",
         "storage"
     ],
