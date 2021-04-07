@@ -1,3 +1,4 @@
+const prodAppId = "ffbhefmlcoihbjcmibbfkocmnaiacinp";
 var Utils = {
     getDT: function(timestamp) {
         var string = 'N/A';
@@ -37,7 +38,9 @@ var Utils = {
         return inStr.replace(/\r\n?|\n/g, "<br />");
     },
     trackGoogleEvent: function(eventType, label) {
-        return;
+        if (window.location.host !== prodAppId) {
+            return;
+        }
         if (eventType === "NOTE_CREATION") {
             _gaq.push(['_trackEvent', "NoteCreated", 'clicked', "NoteCreated"]);
         } else if (eventType === "NOTE_SOFT_DELETION") {
