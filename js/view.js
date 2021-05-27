@@ -5,6 +5,7 @@ function getModel() {
     return getBgPg().Model;
 }
 var View = function() {
+    
     this.initialized = false;
     this.tinymceDef = jQuery.Deferred();
 
@@ -18,6 +19,8 @@ var View = function() {
         (typeof localStorage['orderMap'] === "string") &&
         JSON.parse(localStorage['orderMap']) || {};
     this.content;
+
+
 };
 View.prototype.getNoteTitleFromContent = function(content, subStringIndex = 15) {
     var d = document.createElement('div');
@@ -148,6 +151,11 @@ View.prototype.setUp = function () {
 
     this.bindEvents();
     this.$el.find(".settings").attr("href", "chrome-extension://" + chrome.runtime.id + "/options.html");
+    setTimeout(() => {
+        this.$el.find(".folderMenu, .rpanel").css({
+            height : "100vh"
+        });
+    }, 100);
 };
 View.prototype.renderShareView = function renderShareView() {
     if (this.mode === "NOTES_ACTIVE") {
@@ -432,6 +440,9 @@ View.prototype.bindEvents = function() {
         }
         self.upsertCollapse();
     });
+
+    
+    
 
     this.$el.find(".folderMenu").delegate(".folder-name", "click", function() {
         var $this = $(this);
