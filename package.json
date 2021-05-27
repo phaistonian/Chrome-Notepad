@@ -1,6 +1,6 @@
 {
   "name": "Chrome-Notepad",
-  "version": "6.0.8",
+  "version": "6.0.9",
   "main": "index.js",
   "repository": "https://github.com/phaistonian/Chrome-Notepad.git",
   "author": "George Papadakis <phaistonian@gmail.com>",
