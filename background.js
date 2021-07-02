@@ -1,4 +1,14 @@
 // todo add google analytics
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-91030790-1']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = 'https://ssl.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+
 const NEW = "NEW";
 var BOOKMARK_NAME = "CuteNotepad";
 var TRASH_BOOKMARK_NAME = "trashedNotes";
@@ -28,12 +38,13 @@ var ContextMenuBuilder = function () {
                 contexts:["selection"]
             });
         }
-        chrome.contextMenus.onClicked.addListener(updateNote);
+        chrome.contextMenus.onClicked.addListener(updateNoteFromContextMenu);
     }
 
-    function updateNote(itemData) {
+    function updateNoteFromContextMenu(itemData) {
         if (itemData.menuItemId === NEW) {
-            createNewNote(itemData)
+            createNewNote(itemData);
+            _gaq.push(['_trackEvent', "ContextMenu", 'clicked', "New"]);
         } else {
             var note = notes.filter(function(note) {
                 return note.id === itemData.menuItemId;
@@ -45,7 +56,7 @@ var ContextMenuBuilder = function () {
                     title: getTitleFromContent(content),
                     url: "data:text/plain;charset=UTF-8," + encodePercentSymbol(content)
                 }, updatedNote => {
-                    // todo track context menu used to add to existing view
+                    _gaq.push(['_trackEvent', "ContextMenu", 'clicked', "Existing"]);
                     const index = notes.findIndex(note => note.id === updatedNote.id);
                     notes.splice(index, 1);
                     notes.unshift(updatedNote);
