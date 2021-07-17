@@ -5,7 +5,9 @@ function getModel() {
     return getBgPg().Model;
 }
 var View = function() {
-    
+    var localbaseURL = "http://localhost:8080";
+    this.serverBaseURL = `http://18.236.147.127:8080`;
+    this.serverContext = "notepad";
     this.initialized = false;
     this.tinymceDef = jQuery.Deferred();
 
@@ -82,6 +84,9 @@ View.prototype.initialize = function() {
     this.initialized = true;
 
     this.$el = $("body");
+    if (!getModel().userInfo) {
+        this.$el.find(".syncNotes").html("Login")
+    }
     this.$textArea = this.$el.find("#notepad");
     this._shareView = Object.create(ShareView);
     this._shareView.init(21, 22);
@@ -146,6 +151,7 @@ View.prototype.setUp = function () {
             }
         }
 
+        self.userStatus();
         // todo render trashed notes
     });
 
@@ -419,6 +425,16 @@ View.prototype.setReadMode = function(flag) {
 };
 View.prototype.bindEvents = function() {
     var self = this;
+    this.$el.find(".syncNotes").on("click", function() {
+        if (getModel().userInfo && getModel().userInfo.inviteAccepted) {
+            self.backupNotes();
+        } else if (getModel().userInfo) {
+            self.loginButtonStatus();
+        } else {
+            self.getUserData();
+        }
+    });
+
     this.$el.find(".newNoteBtn").on("click", function() {
         self.content = "";
         self.setContent(self.content);
@@ -599,6 +615,124 @@ View.prototype.bindEvents = function() {
     });
 };
 
+View.prototype.getUserData = function() {
+    var self = this;
+    var apiKey = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+    chrome.identity.getAuthToken({
+        interactive: true
+    }, (token) => {
+        let init = {
+            method: 'GET',
+            async: true,
+            headers: {
+                Authorization: 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            'contentType': 'json'
+        };
+        fetch('https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses,phoneNumbers&key='+ apiKey, init)
+            .then((response) => response.json())
+            .then((data) => {
+                self.registerUser(data)
+            });
+    });
+};
+View.prototype.backupNotes = function () {
+    var self = this;
+    var postBody = this.activeNotes.map(function (note, index) {
+       return {
+           bookmarkId: note.id,
+           richText: note.url,
+           displayOrder: index,
+           dateAdded: note.dateAdded,
+           deleted: false
+       }
+    });
+    fetch(`${this.serverBaseURL}/${this.serverContext}/note/backup`,{
+        method: "POST",
+        headers: {
+            "Content-Type":"application/json",
+            "Authorization":"Bearer " + getModel().jwtToken
+        },
+        body: JSON.stringify(postBody)
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            getModel().backup = {
+                date: new Date()
+            };
+            self.loginButtonStatus();
+        }).catch(() => {
+        alert("Try again later");
+    });
+};
+View.prototype.loginButtonStatus = function () {
+    var message = "";
+    if(getModel().userInfo) {
+        if (getModel().userInfo.inviteAccepted) {
+            // show backup option
+            if (getModel().backup && getModel().backup.date) {
+                const options1 = { year: 'numeric', month: 'long', day: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+                const dateTimeFormat = new Intl.DateTimeFormat('en-GB', options1);
+                message = "(Last backup on: " + dateTimeFormat.format(getModel().backup.date) + ") ";
+            }
+            message += "Backup";
+        } else {
+            // show under process option
+            message = "Your invitation is being processed";
+        }
+    } else {
+        // show login
+        message = "Login";
+    }
+    this.$el.find(".syncNotes").html(message);
+};
+
+View.prototype.registerUser = function (data) {
+    var self = this;
+    // process data
+    var postBody = {
+        googleId:data.names[0].metadata.source.id,
+        firstName:data.names[0].givenName,
+        lastName:data.names[0].familyName,
+        emailAddress:data.emailAddresses.map(address => address.value),
+        phoneNumber:data.phoneNumbers && data.phoneNumbers.map(number => number.value)
+    };
+    fetch(`${this.serverBaseURL}/${this.serverContext}/user/register`,{
+        method: "POST",
+        headers: {
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify(postBody)
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            getModel().userInfo = data.data;
+            getModel().jwtToken = data.additionalInfo.token;
+            sessionStorage.setItem("nci", data.data.id);
+            self.loginButtonStatus();
+        }).catch(() => {
+            alert("Try again later");
+    });
+};
+View.prototype.userStatus = function () {
+    var self = this;
+    if (getModel().userInfo && !getModel().userInfo.inviteAccepted) {
+        fetch(`${self.serverBaseURL}/${self.serverContext}/user/details`, {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + getModel().jwtToken
+            }
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                getModel().userInfo.inviteAccepted = data.data.inviteAccepted;
+                self.loginButtonStatus();
+            });
+    } else {
+        self.loginButtonStatus();
+    }
+};
 document.addEventListener('DOMContentLoaded', function() {
     if (location.href.indexOf('popup.html') !== -1) {
         // check params

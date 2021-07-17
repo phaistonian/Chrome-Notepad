@@ -2,14 +2,14 @@
     "name": "Notepad",
     "description": "A very simple notepad for Chrome with sync functionality.",
     "background": {
-        "scripts": ["js", "background.js"],
+        "scripts": ["background.js"],
         "persistent": true
     },
     "options_page": "options.html",
 
     "browser_action": {
         "default_icon": "icons/19x19-local.png",
-        "default_title": "Chrome Notepad",
+        "default_title": "Chrome Notepad Test",
         "default_popup": "popup.html"
     },
 
@@ -19,6 +19,7 @@
     },
 
     "permissions": [
+        "identity",
         "contextMenus",
         "bookmarks",
         "storage"
@@ -27,5 +28,9 @@
     "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
     "update_url": "http://clients2.google.com/service/update2/crx",
     "manifest_version": 2,
-    "version": "6.1.0"
+    "version": "6.1.0",
+    "oauth2": {
+        "client_id": "17925546962-dlfkl1itr3n5ira8onsffcak3rlq9a6q.apps.googleusercontent.com",
+        "scopes":["profile","email","https://www.googleapis.com/auth/user.phonenumbers.read"]
+    }
 }
